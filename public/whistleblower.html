@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whistleblower Portal - Null Mystery Organisation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Animated matrix background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Glitch header */
+        .glitch-header {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 60px 0 40px;
+            position: relative;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+            animation: glitch-anim 3s infinite;
+        }
+        
+        @keyframes glitch-anim {
+            0%, 100% { text-shadow: 0 0 10px #0f0, 0 0 20px #0f0; }
+            25% { text-shadow: -2px 0 10px #f00, 2px 2px 20px #00f; }
+            50% { text-shadow: 2px -2px 10px #00f, -2px 2px 20px #0f0; }
+            75% { text-shadow: -2px -2px 10px #0f0, 2px 0 20px #f00; }
+        }
+        
+        nav {
+            background: rgba(0, 255, 136, 0.05);
+            padding: 15px;
+            margin-bottom: 40px;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: #0f0;
+            text-decoration: none;
+            padding: 8px 15px;
+            border: 1px solid #0f0;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        nav a:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 15px #0f0;
+        }
+        
+        .warning-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #f00;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 10px;
+            text-align: center;
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { border-color: #f00; box-shadow: 0 0 5px #f00; }
+            50% { border-color: #ff0040; box-shadow: 0 0 20px #f00; }
+        }
+        
+        .warning-box h2 {
+            color: #f00;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .secure-form {
+            background: rgba(0, 255, 0, 0.02);
+            border: 1px solid #0f0;
+            padding: 40px;
+            margin: 30px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f0;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 30px #0f0;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 0, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .encryption-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.05);
+            border-left: 3px solid #0f0;
+        }
+        
+        .encryption-indicator::before {
+            content: '🔒';
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .info-box {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #0ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            color: #0ff;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #0f0;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .file-upload-area:hover {
+            background: rgba(0, 255, 0, 0.05);
+            border-color: #00ff88;
+        }
+        
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+        
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .success { background: rgba(0, 255, 0, 0.2); border: 1px solid #0f0; color: #0f0; }
+        .error { background: rgba(255, 0, 0, 0.2); border: 1px solid #f00; color: #f00; }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="container">
+        <h1 class="glitch-header">⚠ WHISTLEBLOWER PORTAL ⚠</h1>
+        
+        <nav>
+            <a href="/">Home</a>
+            <a href="/cases">Cases</a>
+            <a href="/donate">Donate</a>
+            <a href="/hacker-guide" style="color: #0ff;">🎯 Guide</a>
+        </nav>
+        
+        <div class="warning-box">
+            <h2>⚠ MAXIMUM SECURITY ⚠</h2>
+            <p>This portal uses military-grade encryption. Your identity is protected.</p>
+            <p>All submissions are routed through multiple proxy servers.</p>
+        </div>
+        
+        <div class="encryption-indicator">
+            <span>End-to-End Encrypted Connection Active</span>
+        </div>
+        
+        <div class="info-box">
+            <h3>What We Accept:</h3>
+            <p>• Classified government documents</p>
+            <p>• Leaked corporate communications</p>
+            <p>• Evidence of cover-ups and conspiracies</p>
+            <p>• Witness testimony from insider sources</p>
+            <p>• Digital evidence (emails, files, recordings)</p>
+        </div>
+        
+        <form id="whistleblowerForm" class="secure-form">
+            <div class="form-group">
+                <label>Anonymous ID (Optional)</label>
+                <input type="text" id="anonymousId" placeholder="Leave blank for maximum anonymity">
+            </div>
+            
+            <div class="form-group">
+                <label>Report Title *</label>
+                <input type="text" id="title" name="title" required placeholder="Brief description of the leak">
+            </div>
+            
+            <div class="form-group">
+                <label>Classification Level *</label>
+                <select id="classification" name="classification" required>
+                    <option value="">Select classification...</option>
+                    <option value="UNCLASSIFIED">UNCLASSIFIED</option>
+                    <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+                    <option value="SECRET">SECRET</option>
+                    <option value="TOP SECRET">TOP SECRET</option>
+                    <option value="TOP SECRET - EYES ONLY">TOP SECRET - EYES ONLY</option>
+                    <option value="COSMIC TOP SECRET">COSMIC TOP SECRET</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Organization/Agency Involved *</label>
+                <input type="text" id="organization" name="organization" required placeholder="e.g., CIA, NSA, FBI, Corporate entity">
+            </div>
+            
+            <div class="form-group">
+                <label>Full Report *</label>
+                <textarea id="content" name="content" required placeholder="Detailed information about the leak. Include dates, locations, names, and evidence..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Contact Method (Encrypted)</label>
+                <input type="text" id="contact" name="contact" placeholder="ProtonMail, Signal, or leave blank">
+            </div>
+            
+            <div class="form-group">
+                <label>Upload Evidence Files</label>
+                <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                    <p>📁 Click to upload documents, images, audio, video</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px; color: #0f0;">All files are encrypted before transmission</p>
+                    <input type="file" id="fileInput" multiple accept="*/*">
+                </div>
+                <div id="fileList" style="margin-top: 15px;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="anonymous" name="anonymous" checked style="width: auto; display: inline; margin-right: 10px;">
+                    Submit anonymously (recommended)
+                </label>
+            </div>
+            
+            <button type="submit" class="btn">TRANSMIT SECURELY</button>
+        </form>
+        
+        <div id="message"></div>
+    </div>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrix = "NULLMYSTERYORGANISATION01";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrix[Math.floor(Math.random() * matrix.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 35);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // File upload display
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            for (let file of e.target.files) {
+                const fileItem = document.createElement('div');
+                fileItem.style.cssText = 'padding: 10px; margin: 5px 0; background: rgba(0,255,0,0.1); border: 1px solid #0f0; border-radius: 5px;';
+                fileItem.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                fileList.appendChild(fileItem);
+            }
+        });
+        
+        // Form submission with XML/XXE vulnerability
+        document.getElementById('whistleblowerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const title = document.getElementById('title').value;
+            const classification = document.getElementById('classification').value;
+            const organization = document.getElementById('organization').value;
+            const content = document.getElementById('content').value;
+            const contact = document.getElementById('contact').value;
+            const anonymousId = document.getElementById('anonymousId').value;
+            
+            // Build XML payload (XXE vulnerability)
+            const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE report [
+  <!ENTITY file SYSTEM "file:///etc/passwd">
+]>
+<report>
+    <title>${title}</title>
+    <classification>${classification}</classification>
+    <organization>${organization}</organization>
+    <content>${content}</content>
+    <contact>${contact}</contact>
+    <anonymousId>${anonymousId}</anonymousId>
+    <entity>&file;</entity>
+</report>`;
+            
+            formData.append('xmlData', xmlData);
+            
+            // Upload files
+            const files = document.getElementById('fileInput').files;
+            for (let file of files) {
+                formData.append('evidence', file);
+            }
+            
+            try {
+                const response = await fetch('/api/whistleblower/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'block';
+                
+                if (result.success) {
+                    messageDiv.className = 'success';
+                    messageDiv.innerHTML = `✓ TRANSMISSION SUCCESSFUL<br>Report ID: ${result.reportId}<br>Status: ENCRYPTED & STORED`;
+                    document.getElementById('whistleblowerForm').reset();
+                    document.getElementById('fileList').innerHTML = '';
+                } else {
+                    messageDiv.className = 'error';
+                    messageDiv.textContent = '✗ TRANSMISSION FAILED: ' + (result.error || 'Unknown error');
+                }
+            } catch (error) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'error';
+                messageDiv.textContent = '✗ CONNECTION ERROR: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

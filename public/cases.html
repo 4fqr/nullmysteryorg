@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Files - NULL: Mystery Organisation</title>
+    <!-- DEBUG: Case content loaded from /api/cases/:id -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--accent-red); }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a:hover { color: var(--accent-purple); }
+
+        /* Main content */
+        .main-content {
+            padding: 120px 50px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 50px;
+        }
+
+        .classification-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Search bar */
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        .search-bar button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Cases list */
+        .cases-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .case-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .case-item:hover {
+            border-color: var(--accent-purple);
+            transform: translateX(10px);
+        }
+
+        .case-item.redacted {
+            opacity: 0.6;
+        }
+
+        .case-item.redacted:hover {
+            border-color: var(--accent-red);
+        }
+
+        .case-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-red);
+            letter-spacing: 2px;
+            min-width: 100px;
+        }
+
+        .case-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .case-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .case-classification {
+            padding: 6px 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        /* Case detail modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover { color: var(--accent-red); }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .case-content {
+            font-family: 'Special Elite', cursive;
+            line-height: 2;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        /* Comments section */
+        .comments-section {
+            border-top: 1px solid var(--bg-tertiary);
+            padding-top: 30px;
+            margin-top: 30px;
+        }
+
+        .comments-section h4 {
+            margin-bottom: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .comment-form textarea {
+            flex: 1;
+            padding: 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            resize: none;
+            height: 80px;
+        }
+
+        .comment-form button {
+            padding: 15px 25px;
+            background: var(--accent-purple);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .comment-item {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        /* Report form */
+        .report-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        .report-section h3 {
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--accent-red), #cc0033);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .file-upload {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-primary);
+            border: 2px dashed var(--bg-tertiary);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload label {
+            cursor: pointer;
+            color: var(--accent-purple);
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 100px 20px 30px; }
+            .case-item { grid-template-columns: 1fr; gap: 15px; }
+            nav { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo"><span>NULL</span>: ARCHIVES</a>
+        <ul class="nav-links">
+            <li><a href="/">HOME</a></li>
+            <li><a href="/donate">DONATE</a></li>
+            <li><a href="/subscribe">INNER CIRCLE</a></li>
+            <li><a href="/hacker-guide" style="color: #0ff;">🎯 GUIDE</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="/login" class="btn btn-ghost">AGENT LOGIN</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="classification-badge">DECLASSIFIED ARCHIVES</div>
+            <h1>CASE FILES</h1>
+            <p>Browse our collection of documented anomalies and unexplained incidents</p>
+            <p style="color: #ff0040; font-size: 0.85rem; margin-top: 15px;">
+                ⚠️ <em>Note: Some classified submission systems and evidence repositories are not linked publicly. 
+                Advanced researchers may discover additional resources...</em>
+            </p>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search case files... (try: ' OR '1'='1)">
+            <button onclick="searchCases()">SEARCH</button>
+        </div>
+
+        <div class="cases-list" id="casesList"></div>
+
+        <!-- Report a Case -->
+        <div class="report-section">
+            <h3>📁 SUBMIT A CASE</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Have information about an unexplained incident? Submit it to our archive.
+            </p>
+            <form id="reportForm" onsubmit="submitReport(event)">
+                <div class="form-group">
+                    <label>CASE TITLE</label>
+                    <!-- VULNERABILITY: Command injection via title field -->
+                    <input type="text" id="reportTitle" placeholder="e.g., Unexplained lights over Nevada" required>
+                </div>
+                <div class="form-group">
+                    <label>DESCRIPTION</label>
+                    <textarea id="reportDescription" placeholder="Describe the incident in detail..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>CONTACT (encrypted)</label>
+                    <input type="email" id="reportEmail" placeholder="your-email@secure.org">
+                </div>
+                <div class="file-upload">
+                    <input type="file" id="evidenceFile" name="evidence">
+                    <label for="evidenceFile">📎 Upload Evidence (any file type accepted)</label>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">
+                        Supported: All formats (no restrictions)
+                    </p>
+                </div>
+                <button type="submit" class="submit-btn" style="margin-top: 20px;">SUBMIT TO ARCHIVE</button>
+            </form>
+            <div id="uploadResult" style="margin-top: 15px;"></div>
+        </div>
+    </main>
+
+    <!-- Case Detail Modal -->
+    <div class="modal-overlay" id="caseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="case-number" id="modalCaseNumber"></div>
+                    <h2 id="modalTitle"></h2>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="classification-badge" id="modalClassification"></div>
+                <div class="case-content" id="modalContent"></div>
+                
+                <!-- Comments - VULNERABILITY: Stored XSS -->
+                <div class="comments-section">
+                    <h4>AGENT NOTES</h4>
+                    <div class="comment-form">
+                        <!-- VULNERABILITY: SSTI in case notes -->
+                        <textarea id="commentInput" placeholder="Add your analysis... (Supports templates: <%= secret %>)"></textarea>
+                        <button onclick="submitComment()">POST</button>
+                    </div>
+                    <div class="comments-list" id="commentsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCaseId = null;
+
+        async function loadCases() {
+            try {
+                const response = await fetch('/api/cases');
+                const cases = await response.json();
+                renderCases(cases);
+            } catch (err) {
+                console.error('Failed to load cases:', err);
+            }
+        }
+
+        function renderCases(cases) {
+            const list = document.getElementById('casesList');
+            list.innerHTML = cases.map(c => `
+                <div class="case-item ${c.isRedacted ? 'redacted' : ''}" onclick="openCase(${c.id}, ${c.isRedacted})">
+                    <div class="case-number">${c.caseNumber}</div>
+                    <div class="case-info">
+                        <h3>${c.isRedacted ? '[REDACTED]' : c.title}</h3>
+                        <p>${c.isRedacted ? 'Inner Circle access required' : c.description}</p>
+                    </div>
+                    <div class="case-classification">${c.classification}</div>
+                </div>
+            `).join('');
+        }
+
+        // VULNERABILITY: SQL Injection in search
+        async function searchCases() {
+            const query = document.getElementById('searchInput').value;
+            try {
+                const response = await fetch(`/api/cases/search?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                
+                if (results.error) {
+                    alert('Database Error: ' + results.error + '\nQuery: ' + results.query);
+                } else {
+                    renderCases(results);
+                }
+            } catch (err) {
+                console.error('Search failed:', err);
+            }
+        }
+
+        // VULNERABILITY: IDOR - can access any case by ID
+        async function openCase(id, isRedacted) {
+            currentCaseId = id;
+            
+            try {
+                const response = await fetch(`/api/cases/${id}`);
+                const caseData = await response.json();
+                
+                document.getElementById('modalCaseNumber').textContent = caseData.caseNumber;
+                document.getElementById('modalTitle').textContent = caseData.title;
+                document.getElementById('modalClassification').textContent = caseData.classification;
+                document.getElementById('modalContent').textContent = caseData.content;
+                
+                document.getElementById('caseModal').classList.add('show');
+                
+                loadComments(id);
+            } catch (err) {
+                console.error('Failed to load case:', err);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('show');
+        }
+
+        // VULNERABILITY: Stored XSS in comments
+        async function loadComments(caseId) {
+            try {
+                const response = await fetch(`/api/cases/${caseId}/comments`);
+                const comments = await response.json();
+                
+                const list = document.getElementById('commentsList');
+                // VULNERABILITY: innerHTML without sanitization
+                list.innerHTML = comments.map(c => `
+                    <div class="comment-item">
+                        ${c.content}
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">
+                            ${c.timestamp}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load comments:', err);
+            }
+        }
+
+        // VULNERABILITY: SSTI via case notes
+        async function submitComment() {
+            const content = document.getElementById('commentInput').value;
+            if (!content || !currentCaseId) return;
+            
+            try {
+                const response = await fetch(`/api/cases/${currentCaseId}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                
+                const result = await response.json();
+                
+                if (result.rendered) {
+                    // Show rendered content (SSTI result)
+                    const list = document.getElementById('commentsList');
+                    list.innerHTML = `<div class="comment-item">${result.rendered}</div>` + list.innerHTML;
+                }
+                
+                document.getElementById('commentInput').value = '';
+            } catch (err) {
+                console.error('Failed to submit comment:', err);
+            }
+        }
+
+        // VULNERABILITY: Command injection via report title
+        async function submitReport(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('reportTitle').value;
+            const description = document.getElementById('reportDescription').value;
+            const email = document.getElementById('reportEmail').value;
+            
+            try {
+                const response = await fetch('/api/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description, contactEmail: email })
+                });
+                
+                const result = await response.json();
+                document.getElementById('uploadResult').innerHTML = `
+                    <div style="color: var(--accent-green);">✓ ${result.message}</div>
+                    ${result.debug ? `<div style="color: var(--text-muted); font-size: 0.8rem;">Debug: ${result.debug}</div>` : ''}
+                `;
+            } catch (err) {
+                document.getElementById('uploadResult').innerHTML = `
+                    <div style="color: var(--accent-red);">✗ Submission failed: ${err.message}</div>
+                `;
+            }
+        }
+
+        // VULNERABILITY: Arbitrary file upload
+        document.getElementById('evidenceFile')?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('evidence', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                document.getElementById('uploadResult').innerHTML = `
+                    <div style="color: var(--accent-green);">
+                        ✓ File uploaded: <a href="${result.path}" target="_blank" style="color: var(--accent-purple);">${result.filename}</a>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('uploadResult').innerHTML = `
+                    <div style="color: var(--accent-red);">✗ Upload failed</div>
+                `;
+            }
+        });
+
+        // Enter key search
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchCases();
+        });
+
+        // Check URL hash for direct case access
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCases();
+            
+            if (window.location.hash.startsWith('#case-')) {
+                const caseId = window.location.hash.replace('#case-', '');
+                setTimeout(() => openCase(parseInt(caseId), false), 500);
+            }
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

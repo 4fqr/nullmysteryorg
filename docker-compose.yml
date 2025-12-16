@@ -1,0 +1,11 @@
+services:
+  null-mystery:
+    build: .
+    container_name: null-mystery-org
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped

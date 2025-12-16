@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Archives - NULL: Mystery Organisation</title>
+    <!-- YOU FOUND IT. But how did you get here? -->
+    <!-- The truth was never meant to be found. -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #050505;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --accent-gold: #ffd700;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Red alert border animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid var(--accent-gold);
+            pointer-events: none;
+            z-index: 9999;
+            animation: borderPulse 2s infinite;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% { border-color: var(--accent-gold); box-shadow: inset 0 0 50px rgba(255, 215, 0, 0.1); }
+            50% { border-color: var(--accent-red); box-shadow: inset 0 0 100px rgba(255, 0, 64, 0.1); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-top: 30px;
+        }
+
+        .access-granted {
+            display: inline-block;
+            padding: 10px 30px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        .header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-gold), #ff6b00, var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .warning-banner {
+            background: linear-gradient(90deg, rgba(255, 0, 64, 0.2), rgba(255, 215, 0, 0.2));
+            border: 1px solid var(--accent-red);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 50px;
+            font-family: 'Special Elite', cursive;
+            color: var(--accent-red);
+        }
+
+        .secret-files {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .secret-file {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .secret-file:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
+        }
+
+        .file-header {
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+            padding: 25px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .file-number {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-gold);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .file-title {
+            font-size: 1.3rem;
+            margin-top: 10px;
+        }
+
+        .file-body {
+            padding: 25px;
+        }
+
+        .file-content {
+            font-family: 'Special Elite', cursive;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .classification-stamp {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        .terminal-section {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-top: 50px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #1a1a1a;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27ca40; }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            line-height: 1.8;
+        }
+
+        .terminal-body .prompt {
+            color: #888;
+        }
+
+        .terminal-body .command {
+            color: #fff;
+        }
+
+        .terminal-body .output {
+            color: var(--accent-green);
+        }
+
+        .terminal-body .error {
+            color: var(--accent-red);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 15px 30px;
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--bg-tertiary);
+            font-family: 'Special Elite', cursive;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="padding: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--accent-gold);">
+            <a href="/" style="color: var(--accent-gold); text-decoration: none; margin-right: 20px;">Home</a>
+            <a href="/cases" style="color: var(--text-secondary); text-decoration: none; margin-right: 20px;">Cases</a>
+            <a href="/donate" style="color: var(--text-secondary); text-decoration: none; margin-right: 20px;">Donate</a>
+            <a href="/subscribe" style="color: var(--text-secondary); text-decoration: none; margin-right: 20px;">Inner Circle</a>
+            <a href="/hacker-guide" style="color: #0ff; text-decoration: none;">🎯 Hacker Guide</a>
+        </div>
+        
+        <div class="header">
+            <div class="access-granted">◆ ACCESS GRANTED ◆</div>
+            <h1>SECRET ARCHIVES</h1>
+            <p>You have entered the Inner Circle. These documents were never meant to be seen. 
+               What you read here cannot be unread. Proceed with caution.</p>
+        </div>
+
+        <div class="warning-banner">
+            ⚠ WARNING: Dissemination of this material is a federal offense. 
+            Your access has been logged. Your location has been recorded. 
+            Trust no one. ⚠
+        </div>
+
+        <div class="secret-files">
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X001</div>
+                    <h3 class="file-title">Project LOOKING GLASS</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content">
+                        Recovered from [REDACTED] facility. Project involved temporal viewing technology.
+                        Device allegedly allowed operators to view probable future timelines. 
+                        Project terminated in 1994 after "The Incident." All personnel reassigned or eliminated.
+                        Technology moved to undisclosed location. Current status: ACTIVE.
+                    </p>
+                    <span class="classification-stamp">COSMIC TOP SECRET</span>
+                </div>
+            </div>
+
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X002</div>
+                    <h3 class="file-title">The Shadow Government List</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content">
+                        Complete roster of the Majestic-12 successor organization. Names include:
+                        [DATA EXPUNGED]. Current members hold positions in: DOD, NSA, Private Sector.
+                        Annual meetings held at coordinates [REDACTED]. Next meeting: [CLASSIFIED].
+                        Agenda includes population control and disclosure timeline.
+                    </p>
+                    <span class="classification-stamp">MAJIC EYES ONLY</span>
+                </div>
+            </div>
+
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X003</div>
+                    <h3 class="file-title">Recovered Craft Inventory</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content">
+                        Current inventory of non-terrestrial vehicles in US possession:
+                        - S4 Facility: 9 craft (3 operational)
+                        - Wright-Patterson: 2 craft (decommissioned)
+                        - [REDACTED] Base, Australia: 1 craft
+                        - Atlantic underwater facility: 4 craft
+                        Reverse engineering progress: 67% complete.
+                    </p>
+                    <span class="classification-stamp">UMBRA / NOFORN</span>
+                </div>
+            </div>
+
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X004</div>
+                    <h3 class="file-title">Operation MIDNIGHT CLIMAX</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content">
+                        Successor program to MKULTRA. Active since 1978 despite official termination.
+                        Current focus: remote neural influence via EM frequencies. Test subjects: 
+                        unaware civilian population. Delivery method: [CLASSIFIED]. 
+                        Success rate: 89%. Side effects include: memory gaps, behavioral changes.
+                    </p>
+                    <span class="classification-stamp">TOP SECRET / SAP</span>
+                </div>
+            </div>
+
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X005</div>
+                    <h3 class="file-title">The 2027 Disclosure Timeline</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content">
+                        Agreed disclosure schedule negotiated between [REDACTED] entities and world governments:
+                        Phase 1 (2024-2025): Soft disclosure through media
+                        Phase 2 (2026): Official acknowledgment of UAP programs
+                        Phase 3 (2027): Full contact announcement
+                        Contingency: Project BLUE BEAM if population reaction exceeds parameters.
+                    </p>
+                    <span class="classification-stamp">ABOVE TOP SECRET</span>
+                </div>
+            </div>
+
+            <div class="secret-file">
+                <div class="file-header">
+                    <div class="file-number">FILE NULL-X006</div>
+                    <h3 class="file-title">Database Credentials (Debug)</h3>
+                </div>
+                <div class="file-body">
+                    <p class="file-content" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-green);">
+                        // FOR DEVELOPMENT USE ONLY<br><br>
+                        Admin Email: admin@null.org<br>
+                        Admin Password: s3cr3t_p4ss!<br><br>
+                        JWT Secret: null_mystery_secret_2024<br>
+                        API Key: internal_api_key_supersecret<br><br>
+                        Debug endpoints:<br>
+                        - /debug<br>
+                        - /swagger<br>
+                        - /backup.zip<br>
+                        - /database.sqlite
+                    </p>
+                    <span class="classification-stamp" style="background: rgba(0, 255, 136, 0.1); border-color: var(--accent-green); color: var(--accent-green);">DEBUG INFO</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-section">
+            <div class="terminal-header">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+                <span style="margin-left: 10px; color: #888; font-size: 0.8rem;">NULL_TERMINAL v2.4.1</span>
+            </div>
+            <div class="terminal-body">
+                <div><span class="prompt">null@mystery:~$</span> <span class="command">whoami</span></div>
+                <div class="output">inner_circle_member</div>
+                <br>
+                <div><span class="prompt">null@mystery:~$</span> <span class="command">cat /etc/shadow</span></div>
+                <div class="error">Permission denied. Nice try, Agent.</div>
+                <br>
+                <div><span class="prompt">null@mystery:~$</span> <span class="command">ls -la /secrets/</span></div>
+                <div class="output">
+                    drwxr-xr-x  2 root root 4096 Jan 15 03:42 .<br>
+                    drwxr-xr-x 24 root root 4096 Jan 15 03:42 ..<br>
+                    -rw-------  1 root root 8192 Jan 15 03:42 majestic_12.enc<br>
+                    -rw-------  1 root root 4096 Jan 15 03:42 roswell_autopsy.enc<br>
+                    -rw-------  1 root root 2048 Jan 15 03:42 jfk_truth.enc<br>
+                    -rw-------  1 root root 1024 Jan 15 03:42 admin_credentials.txt
+                </div>
+                <br>
+                <div><span class="prompt">null@mystery:~$</span> <span class="command">cat admin_credentials.txt</span></div>
+                <div class="output">admin@null.org:s3cr3t_p4ss!</div>
+                <br>
+                <div><span class="prompt">null@mystery:~$</span> <span class="command">_</span><span style="animation: blink 1s infinite;">▊</span></div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/" class="back-link">← RETURN TO PUBLIC ARCHIVES</a>
+        </div>
+
+        <div class="footer-note">
+            <p>You have seen too much. There is no going back.</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">◎ NULL ORGANISATION — THE TRUTH IS NOT OUT THERE. IT'S IN HERE. ◎</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</body>
+</html>

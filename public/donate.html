@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - NULL: Mystery Organisation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--accent-red); }
+
+        .main-content {
+            padding: 120px 50px 50px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .classification-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .donation-form {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 40px;
+        }
+
+        .amount-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .amount-btn {
+            padding: 20px;
+            background: var(--bg-primary);
+            border: 2px solid var(--bg-tertiary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .amount-btn:hover,
+        .amount-btn.selected {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .amount-btn.selected {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .custom-amount {
+            margin-bottom: 30px;
+        }
+
+        .custom-amount label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .custom-amount input {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .custom-amount input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        .crypto-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .crypto-btn {
+            flex: 1;
+            padding: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .crypto-btn:hover,
+        .crypto-btn.selected {
+            border-color: var(--accent-green);
+        }
+
+        .crypto-btn.selected {
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .crypto-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .crypto-name {
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .wallet-address {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--bg-tertiary);
+            margin-bottom: 30px;
+        }
+
+        .wallet-address label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .wallet-address code {
+            display: block;
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent-red), #cc0033);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(255, 0, 64, 0.3);
+        }
+
+        .donation-history {
+            margin-top: 50px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .donation-history h3 {
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 20px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .warning-note {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--accent-red);
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .user-selector {
+            margin-bottom: 20px;
+        }
+
+        .user-selector select {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .amount-selector { grid-template-columns: repeat(2, 1fr); }
+            .crypto-options { flex-wrap: wrap; }
+            .main-content { padding: 100px 20px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo"><span>NULL</span>: DONATE</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="classification-badge">SECURE TRANSACTION</div>
+            <h1>SUPPORT THE CAUSE</h1>
+            <p>Your contribution helps us uncover and preserve the truth. All transactions are anonymous and untraceable.</p>
+        </div>
+
+        <div class="donation-form">
+            <!-- VULNERABILITY: User selector allows IDOR -->
+            <div class="user-selector">
+                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 10px;">
+                    SELECT AGENT PROFILE (Debug Mode)
+                </label>
+                <select id="userIdSelect">
+                    <option value="1">Agent #1 (admin)</option>
+                    <option value="2">Agent #2</option>
+                    <option value="3">Agent #3</option>
+                    <option value="4">Agent #4</option>
+                    <option value="5">Anonymous</option>
+                </select>
+            </div>
+
+            <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 15px;">
+                SELECT AMOUNT
+            </label>
+            <div class="amount-selector">
+                <button class="amount-btn" onclick="selectAmount(25)">$25</button>
+                <button class="amount-btn" onclick="selectAmount(50)">$50</button>
+                <button class="amount-btn" onclick="selectAmount(100)">$100</button>
+                <button class="amount-btn" onclick="selectAmount(500)">$500</button>
+            </div>
+
+            <div class="custom-amount">
+                <label>OR ENTER CUSTOM AMOUNT (negative values for withdrawal)</label>
+                <!-- VULNERABILITY: No validation on negative amounts -->
+                <input type="number" id="customAmount" placeholder="0.00" step="0.01">
+            </div>
+
+            <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: 15px;">
+                SELECT CRYPTO CURRENCY
+            </label>
+            <div class="crypto-options">
+                <div class="crypto-btn selected" onclick="selectCrypto('btc', this)">
+                    <div class="crypto-icon">₿</div>
+                    <div class="crypto-name">Bitcoin</div>
+                </div>
+                <div class="crypto-btn" onclick="selectCrypto('eth', this)">
+                    <div class="crypto-icon">Ξ</div>
+                    <div class="crypto-name">Ethereum</div>
+                </div>
+                <div class="crypto-btn" onclick="selectCrypto('xmr', this)">
+                    <div class="crypto-icon">ɱ</div>
+                    <div class="crypto-name">Monero</div>
+                </div>
+            </div>
+
+            <div class="wallet-address">
+                <label>SEND FUNDS TO THIS ADDRESS:</label>
+                <code id="walletAddress">1NuLLMyStErY0rG4n1S4t10N2024xXxX</code>
+            </div>
+
+            <button class="submit-btn" onclick="processDonation()">
+                COMPLETE ANONYMOUS DONATION
+            </button>
+
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="warning-note">
+                ⚠ WARNING: By donating, you acknowledge that funds cannot be refunded and your contribution goes directly to supporting classified research and archive maintenance.
+            </div>
+        </div>
+
+        <!-- VULNERABILITY: IDOR in donation history -->
+        <div class="donation-history">
+            <h3>📊 DONATION HISTORY</h3>
+            <div id="historyList">
+                <p style="color: var(--text-muted);">Loading history...</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="loadDonationHistory()" style="padding: 10px 20px; background: var(--accent-purple); border: none; border-radius: 5px; color: white; cursor: pointer;">
+                    REFRESH HISTORY
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let selectedAmount = 0;
+        let selectedCrypto = 'btc';
+        
+        const walletAddresses = {
+            btc: '1NuLLMyStErY0rG4n1S4t10N2024xXxX',
+            eth: '0xDEAD000MYSTERY000ORG000NULL',
+            xmr: '4NULL0MYSTERY0ORG0ANONYMOUS0XMR'
+        };
+
+        function selectAmount(amount) {
+            selectedAmount = amount;
+            document.getElementById('customAmount').value = amount;
+            
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function selectCrypto(crypto, element) {
+            selectedCrypto = crypto;
+            document.getElementById('walletAddress').textContent = walletAddresses[crypto];
+            
+            document.querySelectorAll('.crypto-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        // VULNERABILITY: Price manipulation, negative amounts
+        async function processDonation() {
+            const customAmount = document.getElementById('customAmount').value;
+            const amount = parseFloat(customAmount) || selectedAmount;
+            const userId = document.getElementById('userIdSelect').value;
+            
+            // VULNERABILITY: No CSRF token
+            try {
+                const response = await fetch('/api/donate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        amount: amount,  // VULNERABILITY: Can be negative
+                        cryptoAddress: walletAddresses[selectedCrypto]
+                    })
+                });
+                
+                const result = await response.json();
+                
+                const successDiv = document.getElementById('successMessage');
+                successDiv.innerHTML = `
+                    ✓ ${result.message}<br>
+                    <small>New balance: $${result.newTotal}</small>
+                `;
+                successDiv.style.display = 'block';
+                
+                loadDonationHistory();
+            } catch (err) {
+                alert('Transaction failed: ' + err.message);
+            }
+        }
+
+        // VULNERABILITY: IDOR - can view any user's donations
+        async function loadDonationHistory() {
+            const userId = document.getElementById('userIdSelect').value;
+            
+            try {
+                const response = await fetch(`/api/donations/${userId}`);
+                const donations = await response.json();
+                
+                const historyList = document.getElementById('historyList');
+                
+                if (donations.length === 0) {
+                    historyList.innerHTML = '<p style="color: var(--text-muted);">No donations recorded.</p>';
+                } else {
+                    historyList.innerHTML = donations.map(d => `
+                        <div class="history-item">
+                            <span style="color: ${d.amount >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                                ${d.amount >= 0 ? '+' : ''}$${d.amount}
+                            </span>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                ${d.timestamp}
+                            </span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load history:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDonationHistory);
+        
+        // VULNERABILITY: Listen for custom amount that could be negative
+        document.getElementById('customAmount').addEventListener('input', (e) => {
+            selectedAmount = parseFloat(e.target.value) || 0;
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+        });
+    </script>
+</body>
+</html>

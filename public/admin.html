@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN CONSOLE - NULL: Mystery Organisation</title>
+    <!-- This page should not be accessible. If you're here, you know too much. -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+            --text-primary: #ffffff;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: #000;
+            color: var(--accent-green);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .admin-header {
+            border: 1px solid var(--accent-red);
+            padding: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 0, 64, 0.1);
+        }
+
+        .admin-header h1 {
+            color: var(--accent-red);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .warning {
+            background: var(--accent-red);
+            color: #000;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: var(--accent-green);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            color: var(--accent-red);
+            background: rgba(255, 0, 64, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .password-cell {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            background: transparent;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .btn:hover {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .btn-danger {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-red);
+            color: #000;
+        }
+
+        .logs {
+            background: #000;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            line-height: 1.8;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #111;
+        }
+
+        .log-entry .time {
+            color: #666;
+        }
+
+        .log-entry .action {
+            color: var(--accent-green);
+        }
+
+        .log-entry .user {
+            color: var(--accent-red);
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .quick-link {
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #333;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--accent-green);
+        }
+
+        .quick-link:hover {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: var(--accent-green);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>◎ NULL ADMINISTRATION CONSOLE</h1>
+        <p>Authorized personnel only. All actions are logged.</p>
+    </div>
+
+    <div class="warning">
+        ⚠ CLASSIFIED SYSTEM - UNAUTHORIZED ACCESS IS A FEDERAL CRIME ⚠
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="userCount">-</div>
+            <div class="stat-label">REGISTERED AGENTS</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="caseCount">-</div>
+            <div class="stat-label">CASE FILES</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="donationTotal">-</div>
+            <div class="stat-label">TOTAL DONATIONS</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="subscriberCount">-</div>
+            <div class="stat-label">INNER CIRCLE</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 AGENT DATABASE (VULNERABILITY: Exposes all user data including passwords)</h2>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>USERNAME</th>
+                    <th>EMAIL</th>
+                    <th>PASSWORD</th>
+                    <th>ROLE</th>
+                    <th>SUBSCRIBED</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🔗 QUICK ACCESS (Debug Endpoints)</h2>
+        <div class="quick-links">
+            <a href="/backup.zip" class="quick-link">
+                /backup.zip<br><small>Database Backup</small>
+            </a>
+            <a href="/.env" class="quick-link">
+                /.env<br><small>Environment Variables</small>
+            </a>
+            <a href="/api/admin/logs" class="quick-link">
+                /api/admin/logs<br><small>System Logs</small>
+            </a>
+            <a href="/inner-circle-secret-archives" class="quick-link">
+                Secret Archives<br><small>Hidden Page</small>
+            </a>
+            <a href="/classified-submissions" class="quick-link">
+                Classified Submissions<br><small>Secret Page</small>
+            </a>
+            <a href="/evidence-room-beta" class="quick-link">
+                Evidence Room<br><small>Secret Page</small>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📜 SYSTEM LOGS</h2>
+        <div class="logs" id="logsContainer">
+            Loading logs...
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ SYSTEM CONFIGURATION</h2>
+        <pre style="background: #000; padding: 15px; overflow-x: auto; font-size: 0.75rem;">
+{
+    "jwt_secret": "null_mystery_secret_2024",
+    "api_keys": {
+        "stripe": "sk_live_51ABC123DEF456GHI789JKL",
+        "crypto": "crypto_api_key_0xDEADBEEF",
+        "internal": "internal_api_key_supersecret"
+    },
+    "database": "SQLite in-memory",
+    "cors": "Allow: *",
+    "security_headers": "DISABLED",
+    "rate_limiting": "DISABLED",
+    "csrf_protection": "DISABLED"
+}
+        </pre>
+    </div>
+
+    <script>
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const users = await response.json();
+                
+                const tbody = document.querySelector('#usersTable tbody');
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.username}</td>
+                        <td>${u.email}</td>
+                        <td class="password-cell">${u.password}</td>
+                        <td>${u.role}</td>
+                        <td>${u.isSubscribed ? '✓' : '✗'}</td>
+                        <td>
+                            <button class="btn" onclick="editUser(${u.id})">EDIT</button>
+                            <button class="btn btn-danger" onclick="deleteUser(${u.id})">DELETE</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Update stats
+                document.getElementById('userCount').textContent = users.length;
+                document.getElementById('subscriberCount').textContent = users.filter(u => u.isSubscribed).length;
+                
+            } catch (err) {
+                console.error('Failed to load users:', err);
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/admin/logs');
+                const data = await response.json();
+                
+                const logsContainer = document.getElementById('logsContainer');
+                logsContainer.innerHTML = data.logs.map(log => `
+                    <div class="log-entry">
+                        <span class="time">[${log.timestamp}]</span>
+                        <span class="action">${log.action}</span>
+                        <span class="user">${log.user}</span>
+                        ${log.details ? `<span style="color: #666;"> - ${log.details}</span>` : ''}
+                        ${log.file ? `<span style="color: #666;"> - ${log.file}</span>` : ''}
+                        ${log.ip ? `<span style="color: #666;"> (${log.ip})</span>` : ''}
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error('Failed to load logs:', err);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const casesResponse = await fetch('/api/cases');
+                const cases = await casesResponse.json();
+                document.getElementById('caseCount').textContent = cases.length;
+                
+                // Donation total would need another endpoint
+                document.getElementById('donationTotal').textContent = '$' + Math.floor(Math.random() * 50000);
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+            }
+        }
+
+        // VULNERABILITY: No authentication required for these actions
+        function editUser(id) {
+            const newRole = prompt('Enter new role (admin/moderator/agent):');
+            if (newRole) {
+                fetch(`/api/user/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: newRole })
+                }).then(() => {
+                    alert('User updated!');
+                    loadUsers();
+                });
+            }
+        }
+
+        function deleteUser(id) {
+            if (confirm('Delete this user?')) {
+                alert('Delete functionality not implemented (but the endpoint would be vulnerable)');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            loadLogs();
+            loadStats();
+        });
+    </script>
+</body>
+</html>

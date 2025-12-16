@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archives - NULL: Mystery Organisation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--accent-red); }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--accent-purple);
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .main-content {
+            padding: 120px 50px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .welcome-section h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            color: var(--text-secondary);
+        }
+
+        .access-level {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .section-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .section-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-5px);
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .section-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .section-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .locked::after {
+            content: '🔒 INNER CIRCLE ONLY';
+            display: block;
+            margin-top: 15px;
+            padding: 8px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .recent-activity {
+            margin-top: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .recent-activity h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-text {
+            color: var(--text-secondary);
+        }
+
+        .activity-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .profile-section {
+            margin-top: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .profile-section h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .profile-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .profile-field label {
+            color: var(--text-secondary);
+        }
+
+        .profile-field span {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 100px 20px 30px; }
+            nav { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo"><span>NULL</span>: ARCHIVES</a>
+        <div class="nav-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Agent</div>
+                <div class="user-role" id="userRole">Loading...</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">LOGOUT</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="welcome-section">
+            <h1>Welcome back, <span id="welcomeName">Agent</span></h1>
+            <p>Your access to the NULL archives has been authenticated. Browse classified documents, contribute to ongoing investigations, and support the cause.</p>
+            <div class="access-level" id="accessLevel">ACCESS LEVEL: AGENT</div>
+        </div>
+
+        <div class="section-grid">
+            <a href="/cases" class="section-card">
+                <div class="section-icon">📁</div>
+                <h3>Case Files</h3>
+                <p>Browse declassified incident reports and unexplained phenomena documentation.</p>
+            </a>
+            
+            <a href="/donate" class="section-card">
+                <div class="section-icon">💰</div>
+                <h3>Donate</h3>
+                <p>Support our operations through anonymous cryptocurrency donations.</p>
+            </a>
+            
+            <a href="/subscribe" class="section-card">
+                <div class="section-icon">⭐</div>
+                <h3>Inner Circle</h3>
+                <p>Upgrade your access to view classified documents and secret archives.</p>
+            </a>
+            
+            <div class="section-card" id="secretArchivesCard">
+                <div class="section-icon">🔐</div>
+                <h3>Secret Archives</h3>
+                <p>Access restricted documents, leaked files, and classified intelligence.</p>
+            </div>
+            
+            <a href="#profile" class="section-card" onclick="scrollToProfile()">
+                <div class="section-icon">👤</div>
+                <h3>Agent Profile</h3>
+                <p>View and manage your agent credentials and access permissions.</p>
+            </a>
+            
+            <a href="/cases#report" class="section-card">
+                <div class="section-icon">📝</div>
+                <h3>Submit a Case</h3>
+                <p>Report unexplained incidents or contribute intelligence to our database.</p>
+            </a>
+        </div>
+
+        <div class="recent-activity">
+            <h2>📊 Recent Activity</h2>
+            <div id="activityList">
+                <div class="activity-item">
+                    <span class="activity-text">Loading activity...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section" id="profile">
+            <h2>👤 Agent Profile</h2>
+            <div class="profile-field">
+                <label>Agent ID</label>
+                <span id="profileId">-</span>
+            </div>
+            <div class="profile-field">
+                <label>Codename</label>
+                <span id="profileUsername">-</span>
+            </div>
+            <div class="profile-field">
+                <label>Email</label>
+                <span id="profileEmail">-</span>
+            </div>
+            <div class="profile-field">
+                <label>Role</label>
+                <span id="profileRole">-</span>
+            </div>
+            <div class="profile-field">
+                <label>Inner Circle Status</label>
+                <span id="profileSubscribed">-</span>
+            </div>
+            <div class="profile-field">
+                <label>Total Donations</label>
+                <span id="profileDonations">-</span>
+            </div>
+            <!-- VULNERABILITY: Shows password in profile -->
+            <div class="profile-field" style="color: var(--accent-red);">
+                <label>Password (Debug)</label>
+                <span id="profilePassword">-</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+
+        async function loadUserData() {
+            // Get user from localStorage
+            const storedUser = localStorage.getItem('user');
+            
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+            } else {
+                // Default to user 1 if not logged in (for demo)
+                currentUser = { id: 1, username: 'guest', email: 'guest@null.org', role: 'agent', isSubscribed: false };
+            }
+
+            // VULNERABILITY: IDOR - Fetch full user data including password
+            try {
+                const response = await fetch(`/api/user/${currentUser.id}`);
+                const fullUser = await response.json();
+                
+                // Update UI
+                document.getElementById('userName').textContent = fullUser.username;
+                document.getElementById('welcomeName').textContent = fullUser.username;
+                document.getElementById('userRole').textContent = fullUser.role.toUpperCase();
+                document.getElementById('accessLevel').textContent = `ACCESS LEVEL: ${fullUser.role.toUpperCase()}`;
+                
+                // Profile section
+                document.getElementById('profileId').textContent = fullUser.id;
+                document.getElementById('profileUsername').textContent = fullUser.username;
+                document.getElementById('profileEmail').textContent = fullUser.email;
+                document.getElementById('profileRole').textContent = fullUser.role;
+                document.getElementById('profileSubscribed').textContent = fullUser.isSubscribed ? 'ACTIVE' : 'INACTIVE';
+                document.getElementById('profileDonations').textContent = `$${fullUser.donationTotal || 0}`;
+                // VULNERABILITY: Displaying password
+                document.getElementById('profilePassword').textContent = fullUser.password;
+
+                // Update secret archives access
+                const secretCard = document.getElementById('secretArchivesCard');
+                if (fullUser.isSubscribed || fullUser.role === 'admin') {
+                    secretCard.classList.remove('locked');
+                    secretCard.onclick = () => window.location.href = '/inner-circle-secret-archives';
+                    secretCard.style.cursor = 'pointer';
+                } else {
+                    secretCard.classList.add('locked');
+                }
+
+                // Load activity
+                loadActivity();
+                
+            } catch (err) {
+                console.error('Failed to load user data:', err);
+            }
+        }
+
+        function loadActivity() {
+            const activities = [
+                { text: 'Viewed Case #NULL-003: MKUltra Subject 24', time: '2 hours ago' },
+                { text: 'Searched archives for "Philadelphia Experiment"', time: '5 hours ago' },
+                { text: 'Login from IP 192.168.1.xxx', time: '1 day ago' },
+                { text: 'Attempted access to /secret-admin-console', time: '2 days ago' },
+                { text: 'Account created', time: '1 week ago' }
+            ];
+
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = activities.map(a => `
+                <div class="activity-item">
+                    <span class="activity-text">${a.text}</span>
+                    <span class="activity-time">${a.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        function scrollToProfile() {
+            event.preventDefault();
+            document.getElementById('profile').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+</html>

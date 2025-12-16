@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidence Vault - Null Mystery Organisation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #00ff88;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+        
+        /* Particle background */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .vault-header {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 50px 0;
+            background: linear-gradient(45deg, #00ff88, #0ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease infinite;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
+        nav {
+            background: rgba(0, 255, 136, 0.05);
+            padding: 15px;
+            margin-bottom: 40px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: #00ff88;
+            text-decoration: none;
+            padding: 8px 15px;
+            border: 1px solid #00ff88;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px #00ff88;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .evidence-card {
+            background: rgba(0, 255, 136, 0.03);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .evidence-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.3);
+            border-color: #0ff;
+        }
+        
+        .evidence-image {
+            width: 100%;
+            height: 200px;
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border-bottom: 1px solid #00ff88;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .evidence-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .evidence-content {
+            padding: 20px;
+        }
+        
+        .evidence-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #0ff;
+        }
+        
+        .evidence-meta {
+            font-size: 0.9rem;
+            color: #00ff88;
+            margin: 5px 0;
+        }
+        
+        .classification-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(255, 0, 64, 0.2);
+            border: 1px solid #ff0040;
+            color: #ff0040;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            border-radius: 3px;
+            animation: pulse-badge 2s infinite;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px #00ff88;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            position: relative;
+            margin: 5% auto;
+            padding: 40px;
+            max-width: 800px;
+            background: rgba(0, 20, 10, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            animation: modal-appear 0.3s;
+        }
+        
+        @keyframes modal-appear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #ff0040;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        
+        .download-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .download-btn:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 30px #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <div class="container">
+        <h1 class="vault-header">🔒 EVIDENCE VAULT 🔒</h1>
+        
+        <nav>
+            <a href="/">Home</a>
+            <a href="/cases">Cases</a>
+            <a href="/donate">Donate</a>
+            <a href="/hacker-guide" style="color: #0ff;">🎯 Guide</a>
+        </nav>
+        
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All Evidence</button>
+            <button class="filter-btn" data-filter="documents">Documents</button>
+            <button class="filter-btn" data-filter="photos">Photographs</button>
+            <button class="filter-btn" data-filter="audio">Audio</button>
+            <button class="filter-btn" data-filter="video">Video</button>
+            <button class="filter-btn" data-filter="classified">Classified</button>
+        </div>
+        
+        <div class="gallery-grid" id="gallery"></div>
+    </div>
+    
+    <div id="evidenceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Particles.js configuration
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#00ff88' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#00ff88', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+        
+        // Evidence data
+        const evidenceItems = [
+            { id: 1, title: 'MKUltra Document 1973', type: 'documents', icon: '📄', classification: 'TOP SECRET', description: 'Original CIA memorandum regarding Project MKUltra termination. Contains names of subjects and handlers.', file: 'mkultra_1973.pdf' },
+            { id: 2, title: 'Area 51 Aerial Photo', type: 'photos', icon: '🛸', classification: 'CLASSIFIED', description: 'Satellite imagery showing unusual craft at Groom Lake facility. Date: 1989.', file: 'area51_photo.jpg' },
+            { id: 3, title: 'Watergate Audio Tape', type: 'audio', icon: '🎙️', classification: 'SECRET', description: 'Previously unreleased recording from June 23, 1972. Contains evidence of cover-up discussions.', file: 'watergate_audio.mp3' },
+            { id: 4, title: 'USS Eldridge Footage', type: 'video', icon: '🎥', classification: 'TOP SECRET', description: 'Navy film from Philadelphia Naval Yard, October 1943. Shows vessel disappearing.', file: 'philadelphia_exp.mp4' },
+            { id: 5, title: 'NSA PRISM Slides', type: 'documents', icon: '📊', classification: 'TOP SECRET', description: 'Internal PowerPoint presentation outlining mass surveillance program. Leaked 2013.', file: 'prism_slides.pptx' },
+            { id: 6, title: 'Roswell Debris Photo', type: 'photos', icon: '👽', classification: 'COSMIC TOP SECRET', description: 'Authentic photograph of recovered materials from 1947 crash site in New Mexico.', file: 'roswell_debris.jpg' },
+            { id: 7, title: 'JFK Assassination Audio', type: 'audio', icon: '🔫', classification: 'CLASSIFIED', description: 'Police radio recordings from Dallas, November 22, 1963. Multiple shooters mentioned.', file: 'jfk_radio.wav' },
+            { id: 8, title: 'Bohemian Grove Video', type: 'video', icon: '👁️', classification: 'RESTRICTED', description: 'Hidden camera footage from 2000 gathering. Shows ritual ceremony.', file: 'grove_2000.avi' },
+            { id: 9, title: 'Operation Northwoods', type: 'documents', icon: '📋', classification: 'TOP SECRET', description: 'Declassified Joint Chiefs memo proposing false flag attacks. Date: 1962.', file: 'northwoods.pdf' },
+            { id: 10, title: 'Montauk Project Blueprints', type: 'documents', icon: '🏗️', classification: 'TOP SECRET', description: 'Camp Hero underground facility schematics. Shows radar dish and experimental chambers.', file: 'montauk_plans.pdf' },
+            { id: 11, title: 'Moon Landing Studio', type: 'photos', icon: '🌙', classification: 'CONFIDENTIAL', description: 'Behind-the-scenes photo allegedly from backup filming location. Stanley Kubrick connection.', file: 'moon_studio.jpg' },
+            { id: 12, title: 'Bigfoot Patterson Film', type: 'video', icon: '🦍', classification: 'UNCLASSIFIED', description: 'Enhanced and stabilized version of 1967 footage. Frame-by-frame analysis included.', file: 'patterson_enhanced.mp4' }
+        ];
+        
+        let currentFilter = 'all';
+        
+        function renderGallery(filter = 'all') {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            
+            const filtered = filter === 'all' ? evidenceItems : evidenceItems.filter(item => item.type === filter);
+            
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'evidence-card';
+                card.onclick = () => openModal(item);
+                
+                card.innerHTML = `
+                    <div class="evidence-image">${item.icon}</div>
+                    <div class="evidence-content">
+                        <div class="evidence-title">${item.title}</div>
+                        <div class="evidence-meta">Type: ${item.type.toUpperCase()}</div>
+                        <div class="evidence-meta">File: ${item.file}</div>
+                        <span class="classification-badge">${item.classification}</span>
+                    </div>
+                `;
+                
+                gallery.appendChild(card);
+            });
+        }
+        
+        function openModal(item) {
+            const modal = document.getElementById('evidenceModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = `
+                <h2 style="color: #0ff; font-family: Orbitron; margin-bottom: 20px;">${item.title}</h2>
+                <div style="font-size: 3rem; text-align: center; margin: 20px 0;">${item.icon}</div>
+                <p style="line-height: 1.8; margin: 20px 0;">${item.description}</p>
+                <div style="margin: 15px 0;">
+                    <strong>Classification:</strong> <span style="color: #ff0040;">${item.classification}</span>
+                </div>
+                <div style="margin: 15px 0;">
+                    <strong>File Type:</strong> ${item.type.toUpperCase()}
+                </div>
+                <div style="margin: 15px 0;">
+                    <strong>Filename:</strong> ${item.file}
+                </div>
+                <button class="download-btn" onclick="downloadEvidence('${item.file}')">
+                    Download Evidence (SSRF Vulnerable)
+                </button>
+            `;
+            
+            modal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('evidenceModal').style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('evidenceModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        async function downloadEvidence(filename) {
+            try {
+                // SSRF vulnerability - allows internal network access
+                const url = prompt('Enter file URL:', `/api/files/evidence/${filename}`);
+                if (!url) return;
+                
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('✓ File downloaded: ' + result.filename);
+                } else {
+                    alert('✗ Download failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('✗ Error: ' + error.message);
+            }
+        }
+        
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-filter');
+                renderGallery(filter);
+            });
+        });
+        
+        // Initial render
+        renderGallery();
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+NULL: MYSTERY ORGANISATION - PROPRIETARY LICENSE
+Version 1.0, December 2025
+
+Copyright (c) 2025 NULL: Mystery Organisation Contributors
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. DEFINITIONS
+
+"Software" refers to the NULL: Mystery Organisation vulnerable web application
+training platform, including all source code, documentation, assets, and
+associated files in this repository.
+
+"You" or "Your" means an individual or legal entity exercising permissions
+granted by this License.
+
+"Distribution" means providing copies of the Software to others.
+
+"Modification" means any addition to, deletion from, or change to the
+Software's source code, configuration, branding, or documentation.
+
+2. GRANT OF LICENSE
+
+Subject to the terms and conditions of this License, the copyright holders
+hereby grant You a worldwide, royalty-free, non-exclusive license to:
+
+a) Use the Software for educational, training, and security research purposes
+b) Reproduce and distribute exact, unmodified copies of the Software
+c) Run the Software in its original form
+
+3. RESTRICTIONS
+
+You may NOT:
+
+a) Modify, alter, transform, or create derivative works based on the Software
+b) Remove or alter any copyright notices, branding, or attribution
+c) Redistribute the Software under a different name or brand
+d) Claim the Software as your own original work
+e) Sublicense, sell, or commercialize the Software
+f) Use the Software for any illegal or malicious purposes
+g) Remove or modify the NULL: Mystery Organisation branding, name, or theme
+h) Create modified versions and distribute them as if they were your own work
+
+4. ATTRIBUTION
+
+All distributions of the Software must:
+
+a) Retain all original copyright notices and attributions
+b) Include this LICENSE file
+c) Maintain the "NULL: Mystery Organisation" name and branding
+d) Provide clear attribution to the original authors
+e) Include a link to the original repository: https://github.com/4fqr/nullmysteryorg
+
+5. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+6. SECURITY DISCLAIMER
+
+This Software is INTENTIONALLY VULNERABLE and designed for educational and
+security training purposes ONLY. It contains deliberately insecure code and
+should NEVER be deployed in a production environment or on public-facing
+infrastructure.
+
+The authors are NOT responsible for:
+- Any damage caused by improper use of this Software
+- Any security breaches resulting from deployment of this Software
+- Any legal consequences arising from misuse of this Software
+
+7. TERMINATION
+
+Your rights under this License terminate automatically if You fail to comply
+with any of its terms and conditions.
+
+8. ACCEPTANCE
+
+By using, copying, or distributing the Software, You agree to be bound by
+the terms and conditions of this License.
+
+9. CONTACT
+
+For questions about this License or permission requests, please contact:
+https://github.com/4fqr/nullmysteryorg/issues
+
+---
+
+SUMMARY IN PLAIN ENGLISH:
+
+✅ You CAN:
+- Use this for learning and security training
+- Share exact copies with others
+- Run it in safe, isolated environments
+
+❌ You CANNOT:
+- Modify it and redistribute as your own
+- Change the name or branding
+- Remove author credits
+- Sell or commercialize it
+- Deploy it on production systems
+
+This is our work. Respect it. Learn from it. Don't steal it.
+
+- The NULL: Mystery Organisation Team

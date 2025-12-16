@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULL: Mystery Organisation</title>
+    <!-- Hidden comment: Admin login at /secret-admin-console - credentials in database -->
+    <!-- TODO: Remove before production - admin@null.org / s3cr3t_p4ss! -->
+    <!-- API Key for internal use: internal_api_key_supersecret -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ff0040;
+            --accent-green: #00ff88;
+            --glow-purple: rgba(139, 92, 246, 0.5);
+            --glow-red: rgba(255, 0, 64, 0.5);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Particle Background */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03),
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.95), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-null {
+            color: var(--accent-red);
+            text-shadow: 0 0 20px var(--glow-red);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-purple);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-purple);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
+            color: white;
+            box-shadow: 0 0 30px var(--glow-purple);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--glow-purple);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-red), #cc0033);
+            color: white;
+            box-shadow: 0 0 30px var(--glow-red);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 10;
+        }
+
+        .classification-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .glitch {
+            position: relative;
+            display: inline-block;
+            animation: glitch 3s infinite;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch-1 0.3s infinite linear alternate-reverse;
+            color: var(--accent-red);
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+        }
+
+        .glitch::after {
+            animation: glitch-2 0.3s infinite linear alternate-reverse;
+            color: var(--accent-purple);
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+        }
+
+        @keyframes glitch-1 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-5px); }
+        }
+
+        @keyframes glitch-2 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(5px); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .scroll-indicator span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .scroll-indicator .arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(45deg);
+        }
+
+        /* Cases Section */
+        .section {
+            padding: 100px 50px;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .case-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 30px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-purple));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .case-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .case-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+        }
+
+        .case-number {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-red);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .case-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .case-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .case-classification {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .case-redacted {
+            position: relative;
+        }
+
+        .case-redacted .case-title,
+        .case-redacted .case-desc {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        .case-redacted::after {
+            content: '[REDACTED - INNER CIRCLE ONLY]';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-red);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-align: center;
+            background: rgba(10, 10, 10, 0.9);
+            padding: 10px 20px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-secondary);
+            padding: 60px;
+            text-align: center;
+        }
+
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 18px 25px;
+            background: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 30px var(--glow-purple);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Donate Section */
+        .donate-section {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            position: relative;
+        }
+
+        .donate-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .donate-text h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .donate-text p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .crypto-address {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--bg-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            word-break: break-all;
+            margin-bottom: 20px;
+        }
+
+        .donate-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .donate-icon {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-red));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            animation: float-icon 3s ease-in-out infinite;
+            box-shadow: 0 0 100px var(--glow-purple);
+        }
+
+        @keyframes float-icon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Inner Circle Section */
+        .inner-circle-section {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--bg-tertiary);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .inner-circle-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .price-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            color: var(--accent-purple);
+            margin: 30px 0;
+        }
+
+        .price-tag span {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .benefits-list {
+            list-style: none;
+            text-align: left;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+
+        .benefits-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .benefits-list li::before {
+            content: '◆';
+            color: var(--accent-purple);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            padding: 60px;
+            text-align: center;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        .footer-warning {
+            font-family: 'Special Elite', cursive;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+        }
+
+        .footer-symbol {
+            font-size: 2rem;
+            color: var(--accent-red);
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-purple);
+        }
+
+        /* Typewriter Effect */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--accent-purple);
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-purple); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            .donate-content {
+                grid-template-columns: 1fr;
+            }
+
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Secure indicator (fake) */
+        .secure-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .secure-badge::before {
+            content: '🔒';
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-purple);
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            z-index: 10000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 30px;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-purple);
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 3px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-purple));
+            animation: loading 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0% { width: 0; margin-left: 0; }
+            50% { width: 100%; margin-left: 0; }
+            100% { width: 0; margin-left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-text">ACCESSING SECURE ARCHIVES...</div>
+        <div class="loading-bar">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Particle Background -->
+    <div id="particles-container"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="/" class="logo">
+            <span class="logo-null">NULL</span>
+            <span>: Mystery Organisation</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/cases">CASE FILES</a></li>
+            <li><a href="/donate">DONATE</a></li>
+            <li><a href="/subscribe">INNER CIRCLE</a></li>
+            <li><a href="/hacker-guide" style="color: #0ff;">🎯 HACKER GUIDE</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="/login" class="btn btn-ghost">AGENT LOGIN</a>
+            <a href="/subscribe" class="btn btn-primary">JOIN NOW</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="classification-badge">⚠ CLASSIFIED INFORMATION AHEAD</div>
+            <h1>
+                <span class="glitch" data-text="NULL">NULL</span>
+            </h1>
+            <h1 style="font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--text-secondary); font-weight: 300;">
+                Mystery Organisation
+            </h1>
+            <p class="hero-subtitle">
+                An anonymous archive documenting unsolved government anomalies, 
+                secret societies, missing persons, and classified incidents. 
+                We are funded by anonymous benefactors. Trust no one.
+            </p>
+            <div class="hero-cta">
+                <a href="#cases" class="btn btn-primary">BROWSE CASE FILES</a>
+                <a href="#donate" class="btn btn-danger">DONATE TO THE CAUSE</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="arrow"></div>
+        </div>
+    </section>
+
+    <!-- Cases Section -->
+    <section class="section" id="cases">
+        <div class="section-header">
+            <div class="classification-badge">DECLASSIFIED ARCHIVES</div>
+            <h2>ACTIVE CASE FILES</h2>
+            <p>Selected documents from our growing archive of unexplained incidents</p>
+        </div>
+        <div class="cases-grid" id="casesGrid">
+            <!-- Cases loaded dynamically -->
+        </div>
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="/cases" class="btn btn-ghost">VIEW ALL CASES →</a>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section" id="search">
+        <div class="search-container">
+            <div class="classification-badge">INTELLIGENCE DATABASE</div>
+            <h2 style="font-family: 'JetBrains Mono', monospace; font-size: 2rem; margin-top: 20px;">
+                SEARCH THE ARCHIVES
+            </h2>
+            <p style="color: var(--text-secondary); margin-top: 15px;">
+                Query our database of classified incidents, personnel files, and recovered documents
+            </p>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Enter search query...">
+                <button class="btn btn-primary" onclick="searchCases()">SEARCH</button>
+            </div>
+            <div id="searchResults" style="margin-top: 30px; text-align: left;"></div>
+        </div>
+    </section>
+
+    <!-- Donate Section -->
+    <section class="section donate-section" id="donate">
+        <div class="donate-content">
+            <div class="donate-text">
+                <div class="classification-badge">SECURE FUNDING</div>
+                <h2>SUPPORT THE CAUSE</h2>
+                <p>
+                    Our operations are funded entirely by anonymous benefactors who believe 
+                    the truth must be preserved. All donations are processed through 
+                    untraceable cryptocurrency channels.
+                </p>
+                <div class="crypto-address">
+                    BTC: 1NuLLMyStErY0rG4n1S4t10N2024xXxX
+                </div>
+                <a href="/donate" class="btn btn-danger">DONATE ANONYMOUSLY</a>
+            </div>
+            <div class="donate-visual">
+                <div class="donate-icon">₿</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inner Circle Section -->
+    <section class="section inner-circle-section" id="inner-circle">
+        <div class="inner-circle-content">
+            <div class="classification-badge" style="border-color: var(--accent-purple); color: var(--accent-purple);">
+                EXCLUSIVE ACCESS
+            </div>
+            <h2 style="font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; margin-top: 20px;">
+                JOIN THE INNER CIRCLE
+            </h2>
+            <p style="color: var(--text-secondary); margin-top: 20px;">
+                Gain access to our most classified archives. Redacted documents. 
+                Leaked testimonies. Files that were never meant to see the light of day.
+            </p>
+            <div class="price-tag">
+                $99<span>/month</span>
+            </div>
+            <ul class="benefits-list">
+                <li>Access to [REDACTED] case files</li>
+                <li>Leaked government documents</li>
+                <li>Whistleblower testimonies</li>
+                <li>Real-time intelligence updates</li>
+                <li>Secure communication channels</li>
+                <li>Monthly dead drop briefings</li>
+            </ul>
+            <a href="/subscribe" class="btn btn-primary" style="padding: 18px 50px; font-size: 1rem;">
+                SUBSCRIBE NOW
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-symbol">◎</div>
+        <p class="footer-warning">
+            Published by an unknown entity. Not affiliated with any government, 
+            corporation, or intelligence agency. The information contained within 
+            these archives is provided for educational purposes only. 
+            We make no claims of authenticity. Trust no one. Question everything.
+        </p>
+        <div class="footer-links">
+            <a href="#cases">Case Files</a>
+            <a href="#search">Search</a>
+            <a href="/archives">Archives</a>
+            <a href="/donate">Donate</a>
+            <a href="/subscribe">Inner Circle</a>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 40px;">
+            © MMXXIV NULL ORGANISATION — ALL RIGHTS OBSCURED
+        </p>
+    </footer>
+
+    <!-- Secure Badge (fake) -->
+    <div class="secure-badge">
+        ENCRYPTED CONNECTION
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // VULNERABILITY: Hardcoded API keys in frontend
+        const API_KEYS = {
+            stripe: 'pk_live_51ABC123DEF456GHI789JKL',
+            analytics: 'UA-XXXXXXXX-X',
+            internal: 'internal_api_key_supersecret'
+        };
+
+        // VULNERABILITY: DOM-based XSS via fragment identifier
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for hash-based content
+            if (window.location.hash) {
+                const hashContent = decodeURIComponent(window.location.hash.substring(1));
+                // VULNERABILITY: Directly inserting hash content into DOM
+                const dynamicContent = document.getElementById('searchResults');
+                if (dynamicContent && hashContent.startsWith('msg=')) {
+                    dynamicContent.innerHTML = hashContent.substring(4);
+                }
+            }
+
+            // Check for URL parameters - Reflected XSS
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorMsg = urlParams.get('error');
+            if (errorMsg) {
+                showToast(errorMsg);
+            }
+
+            // Load cases
+            loadCases();
+
+            // Create particles
+            createParticles();
+
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 1500);
+        });
+
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = 15 + Math.random() * 15 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        async function loadCases() {
+            try {
+                const response = await fetch('/api/cases');
+                const cases = await response.json();
+                
+                const grid = document.getElementById('casesGrid');
+                grid.innerHTML = '';
+                
+                cases.slice(0, 6).forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = `case-card ${c.isRedacted ? 'case-redacted' : ''}`;
+                    card.innerHTML = `
+                        <div class="case-number">${c.caseNumber}</div>
+                        <h3 class="case-title">${c.title}</h3>
+                        <p class="case-desc">${c.description}</p>
+                        <span class="case-classification">${c.classification}</span>
+                    `;
+                    card.onclick = () => {
+                        if (!c.isRedacted) {
+                            window.location.href = `/cases#case-${c.id}`;
+                        } else {
+                            showToast('Access denied. Inner Circle membership required.');
+                        }
+                    };
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error('Failed to load cases:', err);
+            }
+        }
+
+        // VULNERABILITY: SQL Injection via search
+        async function searchCases() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('searchResults');
+            
+            try {
+                const response = await fetch(`/api/cases/search?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                
+                if (results.error) {
+                    // VULNERABILITY: Display error with query details
+                    resultsDiv.innerHTML = `<div style="color: var(--accent-red); padding: 20px; background: rgba(255,0,64,0.1); border-radius: 5px;">
+                        <strong>Database Error:</strong><br>
+                        ${results.error}<br>
+                        <small>Query: ${results.query || 'N/A'}</small>
+                    </div>`;
+                } else if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p style="color: var(--text-muted);">No matching records found in the archive.</p>';
+                } else {
+                    resultsDiv.innerHTML = results.map(c => `
+                        <div class="case-card" style="margin-bottom: 15px;" onclick="window.location.href='/cases#case-${c.id}'">
+                            <div class="case-number">${c.caseNumber}</div>
+                            <h3 class="case-title">${c.title}</h3>
+                            <p class="case-desc">${c.description}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = `<div style="color: var(--accent-red);">Search failed: ${err.message}</div>`;
+            }
+        }
+
+        // Enter key search
+        document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchCases();
+        });
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            // VULNERABILITY: XSS in toast - no sanitization
+            toast.innerHTML = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.case-card, .section-header').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Console Easter Egg
+        console.log(`
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║                                                               ║
+        ║   You found us. But can you find the truth?                  ║
+        ║                                                               ║
+        ║   Hint: The admin left breadcrumbs...                        ║
+        ║   Try: /secret-admin-console                                  ║
+        ║   Or:  /debug                                                 ║
+        ║   Or:  /swagger                                               ║
+        ║   Or:  /backup.zip                                            ║
+        ║                                                               ║
+        ║   The password is never what you think.                      ║
+        ║   Sometimes ' OR '1'='1 is all you need.                     ║
+        ║                                                               ║
+        ╚═══════════════════════════════════════════════════════════════╝
+        `);
+    </script>
+</body>
+</html>
