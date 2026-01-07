@@ -100,7 +100,7 @@ Jim tried to fix some bugs last week but accidentally introduced 15 new ones. We
 
 ```bash
 # Clone this repository
-git clone <repository-url>
+git clone https://github.com/4fqr/nullmysteryorg.git
 cd nullmysteryorg
 
 # Install all the things
